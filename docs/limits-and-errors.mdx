@@ -1,0 +1,45 @@
+---
+title: "Limits and errors"
+description: "Understand the demo boundary and read protocol-native errors."
+---
+
+The public API follows Stellar SEP response formats. It does not wrap responses in Nostro mobile's `success`, `data` or `error` envelope.
+
+A generic protocol error has this shape:
+
+```json
+{
+  "error": "<description of the rejected request>"
+}
+```
+
+Some SEP-31 errors also include a customer `type` or a `fields` object so the sender knows what is missing. Use the HTTP status and structured response together. Error wording may change; do not use message text as a stable machine identifier.
+
+| HTTP status | What to check |
+| --- | --- |
+| `400` | Invalid or missing fields, inconsistent quote, unsupported asset or unaccepted customer. |
+| `401` / `403` | Missing, invalid or expired authentication; unauthorized sending partner. |
+| `404` | An unknown or inaccessible customer, quote or transaction. |
+| `429` | Rate or attempt limit. Respect `Retry-After` when supplied. |
+| `500` / `503` | Processing or dependency failure. Preserve references and reconcile uncertain writes. |
+
+The runtime may produce endpoint-specific errors. Only documented success responses should be treated as success.
+
+## Demo boundaries
+
+- One configured Stellar Testnet asset, quoted to virtual XOF.
+- Fixed demonstration rate: 500 XOF per USDC, zero fees.
+- Payment range: 0.2–5 USDC; XOF payout precision is whole units.
+- Only operator-approved sending accounts and synthetic beneficiaries.
+- Amina Diop and Moussa Ndiaye are fixtures, not real customer endorsements.
+- PI-SPI funds come from an existing prefunded sandbox business account.
+- Bank wallet reception does not imply a bank holds real USDC or that a production settlement agreement exists.
+- No production payment, live exchange-rate promise, automatic refund guarantee or universal bank availability.
+
+The pinned platform currently reports `min_amount: 0` in SEP-31 discovery because that field uses whole numbers. The business quote service enforces the actual **0.2 USDC / 100 XOF minimum**. Use the quote response or rejection as authoritative for permitted amounts.
+
+Treat `expires_at` as authoritative for each quote. Customer approval, available balance and network availability can still prevent execution.
+
+## Data handling
+
+Use synthetic customer information only. Public documentation contains no private keys, provider credentials, operational endpoints or real customer documents. The demonstration's KYC acceptance rules are not production AML or identity approval.

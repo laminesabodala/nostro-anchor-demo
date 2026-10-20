@@ -1,0 +1,36 @@
+---
+title: "Payment lifecycle"
+description: "Follow an individual payment across the Stellar and PI-SPI sandbox legs."
+---
+
+Read the actual `status` on `GET /sep31/transactions/{id}`. Do not advance the interface using a local step counter.
+
+| Status | Meaning in the public protocol | Client action |
+| --- | --- | --- |
+| `pending_receiver` | Nostro is preparing or processing the payment. | Wait and poll. Do not resend funds. |
+| `pending_sender` | The anchor is ready for the quoted Stellar payment. | Check expiry, then fund the exact destination and memo once. |
+| `pending_external` | The off-chain payment has been submitted but is not yet confirmed. | Wait for reconciliation. |
+| `pending_customer_info_update` | More or corrected customer data is required. | Read the relevant SEP-12 customer and supply the requested fields. |
+| `pending_transaction_info_update` | The pinned protocol requires corrected transaction information. | Contact the demo operator; this demo does not expose a correction endpoint. |
+| `completed` | Off-chain delivery has been confirmed. | Show the confirmed result. |
+| `expired` | The payment request expired. | Do not fund it. Ask the operator to reconcile any late transfer. |
+| `error` | Processing cannot continue automatically. | Contact the operator with the transaction ID. Do not repeat the payout. |
+| `refunded` | A refund has been confirmed and reported. | Inspect the refund record. This is not a promise of automatic demo refunds. |
+
+These are protocol states, not a claim that every optional flow is implemented in the demonstration. The normal demonstration exercises creation, funding observation, payout processing and a confirmed PI-SPI result.
+
+## References that matter
+
+- `id`: the Anchor Platform transaction identifier used for status polling.
+- `quote_id`: the agreed conversion amounts and expiry.
+- `stellar_memo`: the correlation value that must accompany the on-chain payment.
+- `stellar_transaction_id`: the observed Stellar transaction.
+- `external_transaction_id`: the off-chain reference when available.
+
+An on-chain result and an off-chain result must both be preserved by the integration. They cannot be inferred from one another.
+
+## Retries and uncertain responses
+
+The documented SEP-31 create operation does not advertise an `Idempotency-Key` header. Do not blindly repeat a timed-out `POST /transactions`, create another transfer to compensate, or pay the same transaction twice. Retain the known transaction and quote IDs and ask the operator to reconcile ambiguous creation.
+
+Nostro must reconcile a PI-SPI timeout against the existing transfer reference before retrying the off-chain leg. A network timeout does not prove the original payment failed.

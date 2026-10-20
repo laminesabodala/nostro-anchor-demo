@@ -1,0 +1,75 @@
+name: nostro-anchor-demo
+services:
+  db:
+    image: postgres:15.10-alpine@sha256:a58cec2ba7a60b4c08d51f2ca93c1ad65fbf96e75cf0c89b7c0d2684860d3bb3
+    env_file: ../.local-platform/runtime.env
+    volumes:
+      - anchor-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U anchor -d anchor"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+    restart: unless-stopped
+  kafka-volume-init:
+    image: postgres:15.10-alpine@sha256:a58cec2ba7a60b4c08d51f2ca93c1ad65fbf96e75cf0c89b7c0d2684860d3bb3
+    user: root
+    entrypoint: ["sh", "-c", "chown 1000:1000 /kafka-data"]
+    volumes:
+      - anchor-kafka:/kafka-data
+  kafka:
+    depends_on:
+      kafka-volume-init:
+        condition: service_completed_successfully
+    image: apache/kafka:3.9.1@sha256:4ceccc577f03f51f6af8dbfda55194d0d892f4fa7913ffbded567ce3895622ed
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
+      KAFKA_HEAP_OPTS: -Xms128m -Xmx384m
+    volumes:
+      - anchor-kafka:/tmp/kraft-combined-logs
+    restart: unless-stopped
+  platform:
+    image: stellar/anchor-platform:2.11.2@sha256:1f540e5c8a3e781ff26b21b7cdf498be18bcef56eb391bef882265c2f8bd3422
+    platform: linux/amd64
+    command: --sep-server --platform-server --event-processor
+    env_file: ../.local-platform/runtime.env
+    volumes:
+      - ../.local-platform/assets.yaml:/config/assets.yaml:ro
+      - ../.local-platform/stellar.toml:/config/stellar.toml:ro
+    ports:
+      - '127.0.0.1:8088:8080'
+      - '127.0.0.1:8089:8085'
+    depends_on:
+      db:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+    restart: unless-stopped
+  observer:
+    image: stellar/anchor-platform:2.11.2@sha256:1f540e5c8a3e781ff26b21b7cdf498be18bcef56eb391bef882265c2f8bd3422
+    platform: linux/amd64
+    command: --stellar-observer
+    env_file: ../.local-platform/runtime.env
+    volumes:
+      - ../.local-platform/assets.yaml:/config/assets.yaml:ro
+      - ../.local-platform/stellar.toml:/config/stellar.toml:ro
+    depends_on:
+      db:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+    restart: unless-stopped
+volumes:
+  anchor-postgres:
+  anchor-kafka:

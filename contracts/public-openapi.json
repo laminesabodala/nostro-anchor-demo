@@ -1,0 +1,2212 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Nostro Anchor Sandbox \u2014 Public API",
+    "version": "0.1.0",
+    "description": "Stellar Testnet and PI-SPI virtual-money demonstration. Pinned official Anchor Platform 2.11.2 (a551cea2fb801d52cce2528be7e60f0620e57bfa). This is the enabled demo surface, not the complete latest SEP specification. No real funds, real FX, bank endorsement or production settlement. The public origin is a temporary demonstration tunnel; it can change or become unavailable. Responses use protocol-native formats; no mobile API envelope."
+  },
+  "servers": [
+    {
+      "url": "https://9239-88-86-232-107.ngrok-free.app",
+      "description": "Temporary operator-run Stellar Testnet / PI-SPI sandbox gateway. Availability depends on the local demonstration stack; no real funds."
+    }
+  ],
+  "tags": [
+    {
+      "name": "Discovery"
+    },
+    {
+      "name": "Authentication"
+    },
+    {
+      "name": "Customers"
+    },
+    {
+      "name": "Quotes"
+    },
+    {
+      "name": "Payments"
+    }
+  ],
+  "security": [
+    {
+      "Sep10Bearer": []
+    }
+  ],
+  "paths": {
+    "/.well-known/stellar.toml": {
+      "get": {
+        "operationId": "discoverAnchor",
+        "summary": "Discover the anchor",
+        "tags": [
+          "Discovery"
+        ],
+        "security": [],
+        "description": "Public SEP-1 discovery document. Use its service URLs and signing key for this environment.",
+        "responses": {
+          "200": {
+            "description": "Stellar discovery TOML.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              },
+              "text/plain; charset=utf-8": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth": {
+      "get": {
+        "operationId": "createChallenge",
+        "summary": "Request an authentication challenge",
+        "tags": [
+          "Authentication"
+        ],
+        "description": "Use the approved sending partner public key. Validate the returned challenge before signing locally.",
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Challenge"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or protocol-specific rejection.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Caller is not authorized.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource is not available to this caller.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests; respect Retry-After when supplied.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Processing error; reconcile uncertain writes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service or dependency unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [],
+        "parameters": [
+          {
+            "name": "account",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/StellarAccount"
+            }
+          },
+          {
+            "name": "home_domain",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "client_domain",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "memo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "post": {
+        "operationId": "verifyChallenge",
+        "summary": "Exchange a signed challenge for a token",
+        "tags": [
+          "Authentication"
+        ],
+        "description": "Sign and validate outside the playground. Never send a private key. Do not submit this challenge as an on-chain payment.",
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Token"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or protocol-specific rejection.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Caller is not authorized.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource is not available to this caller.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests; respect Retry-After when supplied.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Processing error; reconcile uncertain writes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service or dependency unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignedChallenge"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sep12/customer": {
+      "get": {
+        "operationId": "getCustomer",
+        "summary": "Read customer requirements or status",
+        "tags": [
+          "Customers"
+        ],
+        "description": "Use an existing id or the sending account and customer memo. Query before submission to discover required fields.",
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Customer"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or protocol-specific rejection.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Caller is not authorized.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource is not available to this caller.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests; respect Retry-After when supplied.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Processing error; reconcile uncertain writes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service or dependency unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "account",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/StellarAccount"
+            }
+          },
+          {
+            "name": "memo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "memo_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "sep31-sender",
+                "sep31-receiver"
+              ]
+            }
+          },
+          {
+            "name": "transaction_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lang",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "put": {
+        "operationId": "putCustomer",
+        "summary": "Register or update a synthetic customer",
+        "tags": [
+          "Customers"
+        ],
+        "description": "A 202 response returns the customer ID. Read status separately and wait for ACCEPTED. Demo recipients must match the configured Amina Diop or Moussa Ndiaye fixture.",
+        "responses": {
+          "202": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerCreated"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or protocol-specific rejection.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Caller is not authorized.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource is not available to this caller.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests; respect Retry-After when supplied.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Processing error; reconcile uncertain writes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service or dependency unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CustomerInput"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sep38/info": {
+      "get": {
+        "operationId": "getQuoteAssets",
+        "summary": "List quote assets and delivery methods",
+        "tags": [
+          "Quotes"
+        ],
+        "description": "The configured pair is Testnet USDC to sandbox XOF. Authentication requirements follow this demo deployment.",
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuoteInfo"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or protocol-specific rejection.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Caller is not authorized.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource is not available to this caller.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests; respect Retry-After when supplied.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Processing error; reconcile uncertain writes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service or dependency unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sep38/prices": {
+      "get": {
+        "operationId": "getIndicativePrices",
+        "summary": "List indicative buy-asset prices",
+        "tags": [
+          "Quotes"
+        ],
+        "description": "Indicative demo prices do not reserve a quote. Use POST /sep38/quote before creating the payment.",
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Prices"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or protocol-specific rejection.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Caller is not authorized.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource is not available to this caller.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests; respect Retry-After when supplied.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Processing error; reconcile uncertain writes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service or dependency unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "sell_asset",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "stellar:USDC:GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5"
+              ]
+            }
+          },
+          {
+            "name": "sell_amount",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Amount"
+            }
+          },
+          {
+            "name": "buy_delivery_method",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PI_SPI"
+              ]
+            }
+          },
+          {
+            "name": "country_code",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "SEN"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "/sep38/price": {
+      "get": {
+        "operationId": "getIndicativePrice",
+        "summary": "Preview an indicative price",
+        "tags": [
+          "Quotes"
+        ],
+        "description": "Provide exactly one of sell_amount and buy_amount. This indicative response has no quote ID or reserved expiry.",
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Price"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or protocol-specific rejection.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Caller is not authorized.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource is not available to this caller.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests; respect Retry-After when supplied.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Processing error; reconcile uncertain writes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service or dependency unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "context",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "sep31"
+              ]
+            }
+          },
+          {
+            "name": "sell_asset",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "stellar:USDC:GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5"
+              ]
+            }
+          },
+          {
+            "name": "buy_asset",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "iso4217:XOF"
+              ]
+            }
+          },
+          {
+            "name": "sell_amount",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/Amount"
+            }
+          },
+          {
+            "name": "buy_amount",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/Amount"
+            }
+          },
+          {
+            "name": "buy_delivery_method",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "PI_SPI"
+              ]
+            }
+          },
+          {
+            "name": "country_code",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "SEN"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "/sep38/quote": {
+      "post": {
+        "operationId": "createQuote",
+        "summary": "Request a firm sandbox quote",
+        "tags": [
+          "Quotes"
+        ],
+        "description": "Reserve the demo conversion amounts until expires_at. Fees are zero. PI-SPI virtual funds must already be available; Stellar assets do not create fiat liquidity.",
+        "responses": {
+          "201": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Quote"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or protocol-specific rejection.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Caller is not authorized.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource is not available to this caller.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests; respect Retry-After when supplied.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Processing error; reconcile uncertain writes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service or dependency unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuoteInput"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sep38/quote/{quote_id}": {
+      "get": {
+        "operationId": "getQuote",
+        "summary": "Read a quote",
+        "tags": [
+          "Quotes"
+        ],
+        "description": "Use the quote ID returned by POST /sep38/quote.",
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Quote"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or protocol-specific rejection.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Caller is not authorized.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource is not available to this caller.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests; respect Retry-After when supplied.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Processing error; reconcile uncertain writes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service or dependency unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "quote_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/sep31/info": {
+      "get": {
+        "operationId": "getPaymentInfo",
+        "summary": "Read supported payout configuration",
+        "tags": [
+          "Payments"
+        ],
+        "description": "Public discovery for the pinned SEP-31 implementation. Firm quotes are required.",
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentInfo"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or protocol-specific rejection.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Caller is not authorized.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource is not available to this caller.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests; respect Retry-After when supplied.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Processing error; reconcile uncertain writes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service or dependency unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "security": []
+      }
+    },
+    "/sep31/transactions": {
+      "post": {
+        "operationId": "createPayment",
+        "summary": "Create a sandbox payout request",
+        "tags": [
+          "Payments"
+        ],
+        "description": "Creation does not send Stellar funds or complete a PI-SPI payment. Save the returned ID. No Idempotency-Key header is advertised by this operation; do not blindly retry ambiguous creates.",
+        "responses": {
+          "201": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentCreated"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or protocol-specific rejection.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Caller is not authorized.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource is not available to this caller.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests; respect Retry-After when supplied.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Processing error; reconcile uncertain writes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service or dependency unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PaymentInput"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sep31/transactions/{id}": {
+      "get": {
+        "operationId": "getPayment",
+        "summary": "Read a payout and its status",
+        "tags": [
+          "Payments"
+        ],
+        "description": "Poll until a confirmed outcome. pending_external means the PI-SPI result is not yet confirmed. Fields and references appear as processing advances.",
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or protocol-specific rejection.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Authentication is missing or invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Caller is not authorized.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource is not available to this caller.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests; respect Retry-After when supplied.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Processing error; reconcile uncertain writes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service or dependency unavailable.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "Sep10Bearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "SEP-10 JWT",
+        "description": "Token from POST /auth. This is not a Nostro mobile token. Private keys stay outside Mintlify."
+      }
+    },
+    "schemas": {
+      "Amount": {
+        "type": "string",
+        "description": "Decimal string. Preserve precision; do not use floating-point arithmetic.",
+        "pattern": "^\\d+(\\.\\d+)?$",
+        "example": "1"
+      },
+      "StellarAccount": {
+        "type": "string",
+        "description": "Public Stellar account. Never a private key.",
+        "pattern": "^G[A-Z2-7]{55}$"
+      },
+      "Asset": {
+        "type": "string",
+        "description": "SEP-38 asset identifier, including the issuer for Stellar credit assets.",
+        "example": "stellar:USDC:GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5"
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "description": "Customer type, when a SEP-31 customer_info_needed error requires it."
+          },
+          "fields": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "required": [
+          "error"
+        ],
+        "additionalProperties": true
+      },
+      "Challenge": {
+        "type": "object",
+        "properties": {
+          "transaction": {
+            "type": "string",
+            "description": "Base64 XDR authentication challenge; validate and sign outside the browser."
+          },
+          "network_passphrase": {
+            "type": "string",
+            "example": "Test SDF Network ; September 2015"
+          }
+        },
+        "required": [
+          "transaction",
+          "network_passphrase"
+        ]
+      },
+      "SignedChallenge": {
+        "type": "object",
+        "properties": {
+          "transaction": {
+            "type": "string",
+            "description": "Validated authentication challenge signed by the sending account; base64 XDR."
+          }
+        },
+        "required": [
+          "transaction"
+        ],
+        "additionalProperties": false
+      },
+      "Token": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "SEP-10 JWT. Supply as Authorization: Bearer token."
+          }
+        },
+        "required": [
+          "token"
+        ]
+      },
+      "CustomerField": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "string",
+              "binary",
+              "number",
+              "date"
+            ]
+          },
+          "description": {
+            "type": "string"
+          },
+          "choices": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "optional": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACCEPTED",
+              "PROCESSING",
+              "REJECTED",
+              "VERIFICATION_REQUIRED"
+            ]
+          },
+          "error": {
+            "type": "string"
+          }
+        }
+      },
+      "Customer": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "NEEDS_INFO",
+              "ACCEPTED",
+              "PROCESSING",
+              "REJECTED"
+            ]
+          },
+          "fields": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/CustomerField"
+            }
+          },
+          "provided_fields": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/CustomerField"
+            }
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "CustomerInput": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Existing customer ID when updating."
+          },
+          "account": {
+            "$ref": "#/components/schemas/StellarAccount"
+          },
+          "memo": {
+            "type": "string",
+            "description": "Distinct customer reference under the sending partner; preserve as a string."
+          },
+          "memo_type": {
+            "type": "string",
+            "enum": [
+              "id",
+              "text",
+              "hash"
+            ],
+            "description": "Use text for the demo string memos. Omitting this can select the numeric id default."
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "sep31-sender",
+              "sep31-receiver"
+            ]
+          },
+          "first_name": {
+            "type": "string",
+            "example": "Amina"
+          },
+          "last_name": {
+            "type": "string",
+            "example": "Diop"
+          }
+        },
+        "required": [
+          "account",
+          "memo",
+          "type",
+          "first_name",
+          "last_name",
+          "memo_type"
+        ],
+        "additionalProperties": false,
+        "description": "Demo subset of SEP-12. Provide the sending account, stable customer memo, type and fixture name on creation and update. Optionally include the existing id when updating. Accepted receiver IDs are bound to operator-configured PI-SPI sandbox aliases. The sender fixture is Demo Sender."
+      },
+      "CustomerCreated": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "DeliveryMethod": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "PI_SPI"
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "description"
+        ]
+      },
+      "QuoteAsset": {
+        "type": "object",
+        "properties": {
+          "asset": {
+            "$ref": "#/components/schemas/Asset"
+          },
+          "sell_delivery_methods": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DeliveryMethod"
+            }
+          },
+          "buy_delivery_methods": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DeliveryMethod"
+            }
+          },
+          "country_codes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "asset"
+        ]
+      },
+      "QuoteInfo": {
+        "type": "object",
+        "properties": {
+          "assets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuoteAsset"
+            }
+          }
+        },
+        "required": [
+          "assets"
+        ]
+      },
+      "Prices": {
+        "type": "object",
+        "properties": {
+          "buy_assets": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "asset": {
+                  "$ref": "#/components/schemas/Asset"
+                },
+                "price": {
+                  "$ref": "#/components/schemas/Amount"
+                },
+                "decimals": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              },
+              "required": [
+                "asset",
+                "price",
+                "decimals"
+              ]
+            }
+          }
+        },
+        "required": [
+          "buy_assets"
+        ]
+      },
+      "Fee": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "$ref": "#/components/schemas/Amount"
+          },
+          "asset": {
+            "$ref": "#/components/schemas/Asset"
+          },
+          "details": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "amount": {
+                  "$ref": "#/components/schemas/Amount"
+                }
+              },
+              "required": [
+                "name",
+                "amount"
+              ]
+            }
+          }
+        },
+        "required": [
+          "total",
+          "asset"
+        ]
+      },
+      "Price": {
+        "type": "object",
+        "properties": {
+          "price": {
+            "$ref": "#/components/schemas/Amount"
+          },
+          "total_price": {
+            "$ref": "#/components/schemas/Amount"
+          },
+          "sell_amount": {
+            "$ref": "#/components/schemas/Amount"
+          },
+          "buy_amount": {
+            "$ref": "#/components/schemas/Amount"
+          },
+          "fee": {
+            "$ref": "#/components/schemas/Fee"
+          }
+        },
+        "required": [
+          "price",
+          "total_price",
+          "sell_amount",
+          "buy_amount",
+          "fee"
+        ]
+      },
+      "QuoteInput": {
+        "type": "object",
+        "properties": {
+          "context": {
+            "type": "string",
+            "enum": [
+              "sep31"
+            ]
+          },
+          "sell_asset": {
+            "type": "string",
+            "enum": [
+              "stellar:USDC:GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5"
+            ]
+          },
+          "buy_asset": {
+            "type": "string",
+            "enum": [
+              "iso4217:XOF"
+            ]
+          },
+          "sell_amount": {
+            "$ref": "#/components/schemas/Amount"
+          },
+          "buy_amount": {
+            "$ref": "#/components/schemas/Amount"
+          },
+          "buy_delivery_method": {
+            "type": "string",
+            "enum": [
+              "PI_SPI"
+            ]
+          },
+          "country_code": {
+            "type": "string",
+            "enum": [
+              "SEN"
+            ]
+          }
+        },
+        "required": [
+          "context",
+          "sell_asset",
+          "buy_asset",
+          "buy_delivery_method"
+        ],
+        "additionalProperties": false,
+        "oneOf": [
+          {
+            "required": [
+              "sell_amount"
+            ],
+            "not": {
+              "required": [
+                "buy_amount"
+              ]
+            }
+          },
+          {
+            "required": [
+              "buy_amount"
+            ],
+            "not": {
+              "required": [
+                "sell_amount"
+              ]
+            }
+          }
+        ],
+        "description": "Provide exactly one of sell_amount and buy_amount. Fixed demo rate only; no real FX conversion. The pinned release has different optional expiry-field handling from newer SEP-38 revisions; this demo does not expose an expiry override."
+      },
+      "Quote": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "price": {
+            "$ref": "#/components/schemas/Amount"
+          },
+          "total_price": {
+            "$ref": "#/components/schemas/Amount"
+          },
+          "sell_asset": {
+            "$ref": "#/components/schemas/Asset"
+          },
+          "sell_amount": {
+            "$ref": "#/components/schemas/Amount"
+          },
+          "buy_asset": {
+            "$ref": "#/components/schemas/Asset"
+          },
+          "buy_amount": {
+            "$ref": "#/components/schemas/Amount"
+          },
+          "fee": {
+            "$ref": "#/components/schemas/Fee"
+          }
+        },
+        "required": [
+          "id",
+          "expires_at",
+          "price",
+          "total_price",
+          "sell_asset",
+          "sell_amount",
+          "buy_asset",
+          "buy_amount",
+          "fee"
+        ]
+      },
+      "PaymentInfo": {
+        "type": "object",
+        "properties": {
+          "receive": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "enabled": {
+                  "type": "boolean"
+                },
+                "quotes_supported": {
+                  "type": "boolean"
+                },
+                "quotes_required": {
+                  "type": "boolean"
+                },
+                "fee_fixed": {
+                  "type": "integer"
+                },
+                "fee_percent": {
+                  "type": "integer"
+                },
+                "min_amount": {
+                  "type": "number"
+                },
+                "max_amount": {
+                  "type": "number"
+                },
+                "sep12": {
+                  "type": "object",
+                  "additionalProperties": true
+                },
+                "fields": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "receive"
+        ]
+      },
+      "PaymentInput": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "$ref": "#/components/schemas/Amount"
+          },
+          "asset_code": {
+            "type": "string",
+            "enum": [
+              "USDC"
+            ]
+          },
+          "asset_issuer": {
+            "type": "string",
+            "enum": [
+              "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5"
+            ]
+          },
+          "destination_asset": {
+            "type": "string",
+            "enum": [
+              "iso4217:XOF"
+            ]
+          },
+          "quote_id": {
+            "type": "string"
+          },
+          "sender_id": {
+            "type": "string"
+          },
+          "receiver_id": {
+            "type": "string"
+          },
+          "fields": {
+            "type": "object",
+            "properties": {
+              "transaction": {
+                "type": "object",
+                "properties": {},
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "transaction"
+            ],
+            "additionalProperties": false
+          },
+          "lang": {
+            "type": "string",
+            "example": "en"
+          }
+        },
+        "required": [
+          "amount",
+          "asset_code",
+          "asset_issuer",
+          "destination_asset",
+          "quote_id",
+          "sender_id",
+          "receiver_id"
+        ],
+        "additionalProperties": false,
+        "description": "Use an unexpired quote and accepted sender/receiver IDs. The receiver ID selects an existing sandbox alias. Amount is a decimal string in this pinned Anchor Platform implementation. A newer SEP funding_method field is not supported here."
+      },
+      "PaymentCreated": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "stellar_account_id": {
+            "$ref": "#/components/schemas/StellarAccount"
+          },
+          "stellar_memo_type": {
+            "type": "string",
+            "enum": [
+              "id",
+              "text",
+              "hash"
+            ]
+          },
+          "stellar_memo": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "description": "Save id, then read the transaction and wait for pending_sender before funding. Destination and memo can be unavailable until preparation finishes."
+      },
+      "Payment": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending_sender",
+              "pending_receiver",
+              "pending_external",
+              "pending_customer_info_update",
+              "pending_transaction_info_update",
+              "completed",
+              "expired",
+              "error",
+              "refunded"
+            ]
+          },
+          "status_eta": {
+            "type": "integer"
+          },
+          "amount_in": {
+            "$ref": "#/components/schemas/Amount"
+          },
+          "amount_in_asset": {
+            "$ref": "#/components/schemas/Asset"
+          },
+          "amount_out": {
+            "$ref": "#/components/schemas/Amount"
+          },
+          "amount_out_asset": {
+            "$ref": "#/components/schemas/Asset"
+          },
+          "amount_fee": {
+            "$ref": "#/components/schemas/Amount"
+          },
+          "amount_fee_asset": {
+            "$ref": "#/components/schemas/Asset"
+          },
+          "fee_details": {
+            "$ref": "#/components/schemas/Fee"
+          },
+          "quote_id": {
+            "type": "string"
+          },
+          "stellar_account_id": {
+            "$ref": "#/components/schemas/StellarAccount"
+          },
+          "stellar_memo": {
+            "type": "string"
+          },
+          "stellar_memo_type": {
+            "type": "string",
+            "enum": [
+              "id",
+              "text",
+              "hash"
+            ]
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "completed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "user_action_required_by": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "stellar_transaction_id": {
+            "type": "string"
+          },
+          "external_transaction_id": {
+            "type": "string"
+          },
+          "refunded": {
+            "type": "boolean"
+          },
+          "refunds": {
+            "type": "object",
+            "properties": {
+              "amount_refunded": {
+                "$ref": "#/components/schemas/Amount"
+              },
+              "amount_fee": {
+                "$ref": "#/components/schemas/Amount"
+              },
+              "payments": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "amount": {
+                      "$ref": "#/components/schemas/Amount"
+                    },
+                    "fee": {
+                      "$ref": "#/components/schemas/Amount"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "amount",
+                    "fee"
+                  ]
+                }
+              }
+            }
+          },
+          "required_info_message": {
+            "type": "string"
+          },
+          "required_info_updates": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "required": [
+          "id",
+          "status"
+        ],
+        "description": "Fields appear when available. completed is emitted only after the off-chain sandbox payout is confirmed; a Stellar transaction hash alone is not payout proof."
+      },
+      "PaymentResult": {
+        "type": "object",
+        "properties": {
+          "transaction": {
+            "$ref": "#/components/schemas/Payment"
+          }
+        },
+        "required": [
+          "transaction"
+        ]
+      }
+    }
+  },
+  "externalDocs": {
+    "description": "Official Anchor Platform source pinned for this demo",
+    "url": "https://github.com/stellar/anchor-platform/tree/a551cea2fb801d52cce2528be7e60f0620e57bfa"
+  }
+}

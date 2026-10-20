@@ -1,0 +1,31 @@
+---
+title: "Partner authentication"
+description: "SEP-10 verifies the sending Stellar account; partner authorization is an additional check."
+---
+
+Public discovery is separate from protected customer, quote and payment operations. The API reference identifies which endpoints require a bearer token.
+
+1. Discover the service origin, signing key and network in `stellar.toml`.
+2. Request a challenge using the sending account's public key.
+3. Use the Stellar SDK's SEP-10 validation utilities to check the challenge against the expected server key, network, home domain and web-auth domain.
+4. Sign the validated challenge locally using the sending account's test key.
+5. Exchange the signed challenge at `POST /auth`.
+6. Attach the returned JWT as `Authorization: Bearer <token>`.
+
+Do not submit the challenge to the Stellar network: it is an authentication challenge, not a payment. Payment signing occurs later, after customer acceptance and creation of a valid transaction.
+
+The operator allowlists the demo sending account. Owning a Stellar account does not automatically authorize use of Nostro's payout service.
+
+Tokens and private keys are different. Mintlify may send a short-lived bearer token to the configured API origin. The private key stays in the local signing helper. Clear the bearer token from the playground when you finish.
+
+The sender and receiver registered through SEP-12 are customers represented by the sending organization. They are identified by separate customer IDs or account-and-memo combinations. They do not each need a Nostro mobile session.
+
+## Operator helper for the playground
+
+On the configured demo machine, run:
+
+```sh
+node scripts/demo-payment.js --auth-only
+```
+
+This validates and signs the challenge, then saves the short-lived bearer token in ignored `.local/sep10-token.txt`. It creates no payment. Copy that token into Mintlify's bearer authorization field for this sandbox. Keep it private and regenerate it when it expires; never put the sender's private key into Mintlify.

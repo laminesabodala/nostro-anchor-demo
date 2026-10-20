@@ -1,0 +1,44 @@
+---
+title: "Stellar to PI-SPI"
+description: "Explore a cross-network payout using Stellar Testnet and PI-SPI virtual money."
+---
+
+Nostro's anchor demonstration connects an approved sending partner to a PI-SPI sandbox beneficiary. The public API uses Stellar standards for authentication, customer information, quotes and payment requests.
+
+<Warning>
+This is a demonstration environment. Stellar Testnet assets have no monetary value, PI-SPI balances are virtual, and the receiving wallet represents a bank for the demonstration. This does not open a bank account or perform production settlement.
+</Warning>
+
+The demonstration uses the official Stellar Anchor Platform, pinned to **2.11.2**, with Nostro handling the off-chain payout. The API reference covers the enabled public workflow; it is not a catalogue of every optional endpoint in the Stellar standards.
+
+1. Authenticate the approved sending partner using SEP-10.
+2. Register synthetic sender and receiver information using SEP-12.
+3. Request a quote from Testnet USDC to sandbox XOF using SEP-38.
+4. Create a payment request using SEP-31.
+5. Send the exact quoted asset and amount to the returned Stellar address and memo.
+6. Nostro observes the payment and initiates a transfer from its prefunded PI-SPI sandbox account.
+7. Read the transaction until the off-chain payment has a confirmed outcome.
+
+The local demo rate is **500 virtual XOF per 1 Testnet USDC**, with zero demo fees. It is an illustrative rate, not a market quotation. The supported range is **0.2–5 Testnet USDC** per payment.
+
+## Two independent transfers
+
+Stellar reception and PI-SPI disbursement are separate operations. Tokens received on Stellar do not create or replenish the XOF balance. A payout can remain pending after the Stellar transfer succeeds.
+
+Only a confirmed PI-SPI result permits a completed payout. A timed-out bank request needs reconciliation before any retry.
+
+## Public and private boundaries
+
+Sending partners use this documented API. Nostro's mobile sessions, operational controls, business callbacks and Anchor Platform management API are separate and are not exposed here.
+
+Use the [quickstart](/quickstart) for the demonstration. The published server address is a temporary demo tunnel. Its availability depends on the operator’s local stack. If the URL changes, rediscover the anchor and authenticate again before making calls.
+
+## Protocol sources
+
+- [Anchor Platform](https://developers.stellar.org/docs/platforms/anchor-platform)
+- [SEP-10 authentication](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0010.md)
+- [SEP-12 customer data](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0012.md)
+- [SEP-31 payments](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0031.md)
+- [SEP-38 quotes](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0038.md)
+
+The protocol documents evolve independently. This reference describes the pinned runtime and configured demo.

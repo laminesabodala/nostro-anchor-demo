@@ -1,0 +1,56 @@
+---
+title: "Verified demonstration"
+description: "One recorded Stellar Testnet payment followed by a PI-SPI virtual-money payout."
+---
+
+On **20 October 2026**, the demonstration completed a payment of **0.2 Testnet USDC → 100 virtual XOF**.
+
+This record describes an executed sandbox run. It is not a promise of production availability or evidence that real currency changed hands.
+
+| Evidence | Recorded value |
+| --- | --- |
+| Anchor transaction ID | `ccb5098c-5e41-416c-b26c-b176bd29639a` |
+| Stellar network | Testnet |
+| Stellar transaction hash | `bac4334fa079bc29b2df2e299b270b0fdf745c71fc71e6fa7f8c3fbcb158d5ef` |
+| Stellar transaction result | Successful |
+| Stellar ledger timestamp | `2026-10-20T08:42:47Z` |
+| Asset sent | 0.2 Testnet USDC |
+| Off-chain sandbox amount | 100 virtual XOF |
+| PI-SPI end-to-end reference | `ESNB99920261020084255MkWRyTdaG1rJiL` |
+| Final SEP-31 status | `completed` |
+| Completion timestamp | `2026-10-20T08:44:42.794370Z` |
+
+[Open the transaction in Stellar Expert — Testnet](https://stellar.expert/explorer/testnet/tx/bac4334fa079bc29b2df2e299b270b0fdf745c71fc71e6fa7f8c3fbcb158d5ef).
+
+[Read the public Horizon Testnet transaction record](https://horizon-testnet.stellar.org/transactions/bac4334fa079bc29b2df2e299b270b0fdf745c71fc71e6fa7f8c3fbcb158d5ef).
+
+The public Stellar record verifies the on-chain transaction. The PI-SPI reference and final SEP-31 state come from the executed integration run; Stellar Explorer does not independently prove the PI-SPI account credit.
+
+## What this demonstrates
+
+An authenticated partner created a quoted payment, transferred the test asset with the required correlation memo, and received a completed payout status after the PI-SPI sandbox leg.
+
+The Stellar and PI-SPI operations remain separate. The PI-SPI payment used prefunded virtual money; the testnet asset did not create fiat liquidity.
+
+## What remains outside this evidence
+
+This single run does not establish production settlement, production bank authorization, live foreign-exchange liquidity, universal bank availability, recovery under every failure condition, or duplicate-payment protection across all scenarios. Testnet explorers may also lose older history following network resets.
+
+## Second run and replay check
+
+The final official unique-address callback flow also completed:
+
+| Evidence | Value |
+|---|---|
+| SEP-31 transaction | `b7ee8db3-7451-45b5-915c-ce49095c1402` |
+| Testnet payment | `253298534d656f34a748a96f8b8390d4139b87110c3e12c335ad8b8a097a0b5d` |
+| Amount | 0.2 Testnet USDC → 100 virtual XOF |
+| PI-SPI reference | `ESNB99920261020084611ySBYfqLnRTs9bo` |
+| Final SEP-31 status | `completed` |
+| Completion time | `2026-10-20T08:46:12.904791Z` |
+
+Re-running the same saved run returned the same transaction and transfer references. A separate read of the beneficiary's PI-SPI ledger confirmed **one matching 100 XOF credit** for this payment. The final beneficiary balance was 1,000,000,300 virtual XOF: its initial test balance plus the adapter test and two Anchor payments.
+
+After both Anchor payments, the bank demo wallet held **0.4000000 Testnet USDC** and the sender held **19.6000000**. Inspect the second transfer on [Stellar Expert Testnet](https://stellar.expert/explorer/testnet/tx/253298534d656f34a748a96f8b8390d4139b87110c3e12c335ad8b8a097a0b5d).
+
+This is evidence of these specific completed runs and replay check, not a guarantee covering every possible network failure.

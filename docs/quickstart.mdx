@@ -1,0 +1,124 @@
+---
+title: "Run a sandbox payout"
+description: "Use a test sender, an approved fixture recipient and a small virtual payment."
+---
+
+## Before starting
+
+Obtain the current demo HTTPS origin and authorized sandbox fixtures from the operator. The synthetic recipients are **Amina Diop** and **Moussa Ndiaye**. The operator binds each accepted receiver customer ID to its existing PI-SPI sandbox alias. This fixture mapping is a demo rule, not general identity matching by name.
+
+You need a pre-authorized sending Stellar account and Testnet USDC on that account. Mintlify can make API calls; it does not safely hold private keys or sign Stellar transactions. The local operator helper runs the full demonstration; the manual API walkthrough below is an alternative.
+
+The asset is identified by its **code and issuer**, on **Testnet**:
+
+```text
+stellar:USDC:GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5
+```
+
+The Stellar network passphrase is:
+
+```text
+Test SDF Network ; September 2015
+```
+
+Do not substitute a Mainnet issuer or send real funds.
+
+## Recommended: run the complete local demonstration
+
+With the operator's local stack running, execute this from the `anchor-demo` directory:
+
+```sh
+node scripts/demo-payment.js first-payment
+```
+
+This is an operator-run integration helper, not an HTTP endpoint. It authenticates, registers Demo Sender and Amina Diop, creates a quote and payment, signs a **0.2 Testnet USDC → 100 virtual XOF** payment, and polls the result. It uses the public Stellar endpoints and signs the funding transaction locally. The Anchor Platform obtains and records the destination and unique memo through its own backend integration, so a manual sender does not need a private preparation call.
+
+The helper reads test credentials from ignored `.local-platform/sender.json` and saves its progress under ignored `.local/`. Private keys never belong in Mintlify, request bodies or command-line arguments. A supplied run name identifies one payment; rerun the **same name** to resume that payment. A different name requests a new payment. Do not run concurrent copies for the same payment.
+
+A completed run prints its observed receipt. An incomplete run must remain pending or failed. See the [verified demonstration](/verified-demo) for one recorded run; it does not predict the outcome of a new request.
+
+## Manual API walkthrough
+
+The steps below describe the public calls for an independently implemented sender. They are an alternative to running the whole-flow helper. Do not create a payment manually and then invoke the helper expecting it to fund that existing transaction.
+
+### 1. Discover and authenticate
+
+Read `GET /.well-known/stellar.toml`. Its URLs identify the authentication, customer, quote and payment services, and its signing key identifies the challenge signer.
+
+Request `GET /auth?account=<sending-public-key>`. Validate the challenge with the Stellar SDK before signing it outside the browser, then submit the signed XDR to `POST /auth`.
+
+The response contains `token`. Use that short-lived SEP-10 JWT as the API playground's bearer token. It is separate from a Nostro mobile session.
+
+### 2. Register both customers
+
+Use `GET /sep12/customer` to see the requirements, then `PUT /sep12/customer` with the requested fields. Register each customer separately with `type` set to `sep31-sender` or `sep31-receiver`, the sending partner's public `account`, and a distinct string `memo`. The sender fixture is `first_name: "Demo"`, `last_name: "Sender"`. Set `memo_type` to `text` for these string memos; the runtime defaults to a numeric memo type otherwise. Keep the same account, memo, memo type, customer type and fixture name on updates, and include the existing `id` when updating.
+
+For example, the receiver body has this shape:
+
+```json
+{
+  "account": "<sending-public-key>",
+  "memo": "receiver-amina-demo",
+  "memo_type": "text",
+  "type": "sep31-receiver",
+  "first_name": "Amina",
+  "last_name": "Diop"
+}
+```
+
+Save the returned `id`; `202` means the request was accepted, not that every KYC check has passed. Fetch the customer status and continue only when it is `ACCEPTED`.
+
+Synthetic fixture acceptance is a demo rule, not a claim of production identity verification.
+
+### 3. Request a firm quote
+
+Read `/sep38/info` to discover assets and delivery methods. A quote request for 1 Testnet USDC is:
+
+```json
+{
+  "context": "sep31",
+  "sell_asset": "stellar:USDC:GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5",
+  "buy_asset": "iso4217:XOF",
+  "sell_amount": "1",
+  "buy_delivery_method": "PI_SPI"
+}
+```
+
+Send this body to `POST /sep38/quote`. Save the quote `id`, amounts and `expires_at`. Values shown here are request examples, not evidence of an executed transaction. Do not fund an expired quote.
+
+### 4. Create the payment
+
+Send this shape to `POST /sep31/transactions`, replacing placeholders with values from this session:
+
+```json
+{
+  "amount": "1",
+  "asset_code": "USDC",
+  "asset_issuer": "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5",
+  "destination_asset": "iso4217:XOF",
+  "quote_id": "<quote-id>",
+  "sender_id": "<sender-customer-id>",
+  "receiver_id": "<receiver-customer-id>",
+  "fields": {
+    "transaction": {}
+  }
+}
+```
+
+The pinned platform accepts an empty `fields.transaction` object here. The receiver customer ID selects its operator-configured PI-SPI alias; there is no second alias to enter on the payment. This release does not use the newer `funding_method` request field. The quote identifies the `PI_SPI` delivery method.
+
+Save the returned transaction `id` immediately. Fetch `GET /sep31/transactions/{id}` and wait for `pending_sender`. Read the current destination, memo type, memo and amounts from the transaction.
+
+### 5. Sign and fund outside Mintlify
+
+Use your own local Stellar SDK signer to fund the transaction created in step 4. Read its current `stellar_account_id`, `stellar_memo_type`, `stellar_memo`, `amount_in` and asset. Validate these against the accepted quote and expected destination, and fund only while the transaction is `pending_sender` and the quote remains valid.
+
+The full-flow `demo-payment.js` helper above manages its own transaction and should not be used as a standalone funding command for this manual flow. Keep the private key outside the browser. Preserve the signed transaction and hash so a network retry can reconcile or resubmit the same payment rather than generate a new transfer.
+
+A wallet transfer without the returned memo cannot be assumed to belong to the payout.
+
+### 6. Inspect the result
+
+Poll `GET /sep31/transactions/{id}`. `pending_external` means the off-chain transfer is awaiting confirmation. `completed` means the integration has confirmed the PI-SPI sandbox payout. A Stellar transaction hash alone does not prove the beneficiary was credited.
+
+For the live demonstration, pair the SEP-31 result with the operator's actual PI-SPI transaction result and before/after virtual balance. Do not manufacture a receipt or a completed response if either network is unavailable.

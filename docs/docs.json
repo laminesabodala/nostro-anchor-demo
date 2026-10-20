@@ -1,0 +1,39 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "Nostro Anchor Sandbox",
+  "colors": {
+    "primary": "#2855FF",
+    "light": "#4671FF",
+    "dark": "#1940D5"
+  },
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Start here",
+        "groups": [
+          {
+            "group": "Sandbox",
+            "pages": [
+              "index",
+              "quickstart",
+              "authentication",
+              "payment-lifecycle",
+              "limits-and-errors",
+              "verified-demo"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API reference",
+        "groups": [
+          {
+            "group": "Public Stellar APIs",
+            "openapi": "/openapi.json"
+          }
+        ]
+      }
+    ]
+  }
+}
