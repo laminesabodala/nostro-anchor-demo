@@ -1,0 +1,10 @@
+[Unit]
+Description=Daily Nostro sandbox backup
+
+[Timer]
+OnCalendar=*-*-* 04:15:00 UTC
+Persistent=true
+Unit=nostro-anchor-backup.service
+
+[Install]
+WantedBy=timers.target

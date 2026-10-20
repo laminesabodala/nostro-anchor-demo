@@ -16,6 +16,7 @@ function createPispiPayout({
   apiKey,
   payerAlias,
   allowedRecipientAliases = [],
+  allowedRecipientAccounts = [],
   maxAmountXof = 10000,
   baseUrl = BASE,
   tokenUrl = TOKEN,
@@ -36,7 +37,8 @@ function createPispiPayout({
   )
     throw new Error("Invalid sandbox transfer cap");
   const recipients = new Set(allowedRecipientAliases);
-  if (!recipients.size)
+  const accounts = new Set(allowedRecipientAccounts.map(a => `${a.participant}:${a.accountNumber}`));
+  if (!recipients.size && !accounts.size)
     throw new Error("Explicit sandbox beneficiary allowlist required");
   let cached, pending;
   async function token() {
@@ -125,11 +127,18 @@ function createPispiPayout({
       );
     }
   }
-  function prepare({ paymentId, recipientAlias, amountXof }) {
+  function routing({ recipientAlias, recipientAccount, recipientParticipant }) {
+    if (recipientAlias && !recipientAccount && !recipientParticipant && recipients.has(recipientAlias))
+      return { payeAlias: recipientAlias };
+    if (!recipientAlias && recipientAccount && recipientParticipant !== "SNB999" &&
+        accounts.has(`${recipientParticipant}:${recipientAccount}`))
+      return { payeOther: recipientAccount, payeParticipant: recipientParticipant };
+    throw new Error("Sandbox beneficiary not permitted");
+  }
+  function prepare({ paymentId, recipientAlias, recipientAccount, recipientParticipant, amountXof }) {
     if (typeof paymentId !== "string" || !paymentId || paymentId.length > 200)
       throw new Error("Invalid paymentId");
-    if (!recipients.has(recipientAlias))
-      throw new Error("Sandbox beneficiary not permitted");
+    const route = routing({recipientAlias, recipientAccount, recipientParticipant});
     if (
       !Number.isSafeInteger(amountXof) ||
       amountXof < 1 ||
@@ -141,7 +150,7 @@ function createPispiPayout({
         "NST" +
         createHash("sha256").update(paymentId).digest("hex").slice(0, 30),
       payeurAlias: payerAlias,
-      payeAlias: recipientAlias,
+      ...route,
       montant: amountXof,
       confirmation: false,
       motif: "Nostro Stellar Testnet demo - virtual funds",
@@ -152,7 +161,7 @@ function createPispiPayout({
       !i ||
       !/^NST[0-9a-f]{30}$/.test(i.txId) ||
       i.payeurAlias !== payerAlias ||
-      !recipients.has(i.payeAlias) ||
+      i.payeIban !== undefined ||
       !Number.isSafeInteger(i.montant) ||
       i.montant < 1 ||
       i.montant > maxAmountXof ||
@@ -162,7 +171,7 @@ function createPispiPayout({
     return {
       txId: i.txId,
       payeurAlias: i.payeurAlias,
-      payeAlias: i.payeAlias,
+      ...routing({recipientAlias:i.payeAlias,recipientAccount:i.payeOther,recipientParticipant:i.payeParticipant}),
       montant: i.montant,
       confirmation: false,
       motif: "Nostro Stellar Testnet demo - virtual funds",
@@ -190,6 +199,8 @@ function createPispiPayout({
       ...(raw.statutRaison ? { reason: raw.statutRaison } : {}),
       ...(raw.montant !== undefined ? { amountXof: raw.montant } : {}),
       ...(raw.payeAlias ? { recipientAlias: raw.payeAlias } : {}),
+      ...(raw.payeOther ? { recipientAccount: raw.payeOther } : {}),
+      ...(raw.payeParticipant ? { recipientParticipant: raw.payeParticipant } : {}),
       ...(raw.dateIrrevocabilite
         ? { completedAt: raw.dateIrrevocabilite }
         : {}),
@@ -207,7 +218,9 @@ function createPispiPayout({
       if (
         (result.amountXof !== undefined && result.amountXof !== body.montant) ||
         (result.recipientAlias !== undefined &&
-          result.recipientAlias !== body.payeAlias)
+          result.recipientAlias !== body.payeAlias) ||
+        (body.payeOther && result.recipientAccount !== undefined && result.recipientAccount !== body.payeOther) ||
+        (body.payeParticipant && result.recipientParticipant !== undefined && result.recipientParticipant !== body.payeParticipant)
       )
         throw new PispiError(
           "INVALID_RESPONSE",

@@ -1,0 +1,9 @@
+**
+!package.json
+!package-lock.json
+!src/
+!src/**
+!scripts/
+!scripts/start-sandbox.js
+!deploy/
+!deploy/entrypoint.sh

@@ -21,7 +21,7 @@ async function setup(
   const db = await createStore();
   t.after(() => db.close());
   await db.query(
-    "INSERT INTO customers VALUES($1,'sender','memo','sep31-receiver','Amina','Diop','alias')",
+    "INSERT INTO customers(id,account,memo,type,first_name,last_name,alias) VALUES($1,'sender','memo','sep31-receiver','Amina','Diop','alias')",
     [cid],
   );
   await db.query(
@@ -38,16 +38,19 @@ async function setup(
     amount_in: { asset: "stellar:USDC:issuer", amount: "1.0000000" },
     amount_out: { asset: "iso4217:XOF", amount: "500" },
     quote_id: qid,
-    customers: { receiver: { id: cid } },
+    customers: { receiver: { id: cid }, sender: { id: "sender-id" } },
     transfer_received_at: "2026-10-20",
     status: "pending_receiver",
     stellar_transactions: [{ id: hash }],
   };
+  const destination = require("../src/destinations").destinationFor(require("../src/destinations").FIXTURES[0]);
+  await db.query("INSERT INTO payment_requests(quote_id,transaction_id,request,destination,state) VALUES($1,'ap-id',$2,$3,'BOUND')",
+    [qid, JSON.stringify({receiver_id:cid,sender_id:"sender-id",amount:"1.0000000"}),JSON.stringify(destination)]);
   let sends = 0,
     reads = 0,
     rpcs = 0;
   const pispi = {
-    prepare: () => ({ txId: "unique", payeAlias: "alias", montant: 500 }),
+    prepare: ({recipientAlias}) => { assert.equal(recipientAlias, require("../src/destinations").FIXTURES[0].alias); return ({ txId: "unique", payeAlias: "alias", montant: 500 }); },
     send: async () => {
       sends++;
       if (sendError) throw Error("timeout");
@@ -193,6 +196,7 @@ test("one Stellar operation cannot authorize a second payout", async (t) => {
   await s.db.query(
     "INSERT INTO funding_intents(transaction_id,destination,memo,memo_type,asset,amount) VALUES('ap-other','bank','123','id','stellar:USDC:issuer','1.0000000')",
   );
+  await s.db.query("INSERT INTO payment_requests(quote_id,transaction_id,request,destination,state) SELECT $1,'ap-other',request,destination,'BOUND' FROM payment_requests WHERE quote_id=$2", [second,qid]);
   await assert.rejects(
     s.processor.processTransaction({
       ...s.transaction,

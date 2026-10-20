@@ -1,0 +1,9 @@
+[Unit]
+Description=Consistent encrypted Nostro sandbox backup
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/nostro-anchor-demo/deploy/backup.sh
+TimeoutStartSec=10min

@@ -1,44 +1,22 @@
 ---
-title: "Stellar to PI-SPI"
-description: "Explore a cross-network payout using Stellar Testnet and PI-SPI virtual money."
+title: "Nostro Anchor API"
+description: "Send payments to bank accounts and mobile-money accounts."
 ---
 
-Nostro's anchor demonstration connects an approved sending partner to a PI-SPI sandbox beneficiary. The public API uses Stellar standards for authentication, customer information, quotes and payment requests.
+Nostro connects payment businesses to receiving accounts through Stellar Anchor Platform and PI-SPI. Authenticate, register the sender and receiver, get a quote, create a payment, then fund and track it.
 
-<Warning>
-This is a demonstration environment. Stellar Testnet assets have no monetary value, PI-SPI balances are virtual, and the receiving wallet represents a bank for the demonstration. This does not open a bank account or perform production settlement.
-</Warning>
+<Card title="Run a payment" icon="play" href="/quickstart">
+  Complete a payment in the API playground. Choose an amount between 100 and 2,500 XOF.
+</Card>
 
-The demonstration uses the official Stellar Anchor Platform, pinned to **2.11.2**, with Nostro handling the off-chain payout. The API reference covers the enabled public workflow; it is not a catalogue of every optional endpoint in the Stellar standards.
+<Card title="Test beneficiaries" icon="users" href="/test-beneficiaries">
+  Copy the bank-account or mobile-money details to use in the sandbox.
+</Card>
 
-1. Authenticate the approved sending partner using SEP-10.
-2. Register synthetic sender and receiver information using SEP-12.
-3. Request a quote from Testnet USDC to sandbox XOF using SEP-38.
-4. Create a payment request using SEP-31.
-5. Send the exact quoted asset and amount to the returned Stellar address and memo.
-6. Nostro observes the payment and initiates a transfer from its prefunded PI-SPI sandbox account.
-7. Read the transaction until the off-chain payment has a confirmed outcome.
+## About this sandbox
 
-The local demo rate is **500 virtual XOF per 1 Testnet USDC**, with zero demo fees. It is an illustrative rate, not a market quotation. The supported range is **0.2–5 Testnet USDC** per payment.
+This environment uses Stellar Testnet and PI-SPI virtual accounts. No real money moves. The BIMAO-labelled bank example routes to Banque Sénégal 999, and the mobile-money example routes to EME Côte d'Ivoire 999. The wallet number is a fixed test lookup for that account. These examples do not establish a production BIMAO or commercial wallet connection.
 
-## Two independent transfers
+The sandbox exchange rate is 500 XOF per USDC with zero service fees. The PI-SPI account is funded separately; this demonstrates tracking funding and payout, not live currency conversion. Use only the provided test customers; the sandbox account is shared.
 
-Stellar reception and PI-SPI disbursement are separate operations. Tokens received on Stellar do not create or replenish the XOF balance. A payout can remain pending after the Stellar transfer succeeds.
-
-Only a confirmed PI-SPI result permits a completed payout. A timed-out bank request needs reconciliation before any retry.
-
-## Public and private boundaries
-
-Sending partners use this documented API. Nostro's mobile sessions, operational controls, business callbacks and Anchor Platform management API are separate and are not exposed here.
-
-Use [Run a payment from the playground](/live-demo) for the live presentation, or the [quickstart](/quickstart) for integration details. The published server address is a temporary demo tunnel. Its availability depends on the operator’s local stack. If the URL changes, rediscover the anchor and authenticate again before making calls.
-
-## Protocol sources
-
-- [Anchor Platform](https://developers.stellar.org/docs/platforms/anchor-platform)
-- [SEP-10 authentication](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0010.md)
-- [SEP-12 customer data](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0012.md)
-- [SEP-31 payments](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0031.md)
-- [SEP-38 quotes](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0038.md)
-
-The protocol documents evolve independently. This reference describes the pinned runtime and configured demo.
+The API is hosted at `https://sandbox-api.nostro.finance` and runs independently of the development computer.

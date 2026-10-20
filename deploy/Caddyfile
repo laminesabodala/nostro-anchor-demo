@@ -1,0 +1,8 @@
+{
+	admin off
+}
+
+{$DEMO_DOMAIN} {
+	encode gzip
+	reverse_proxy business:3011
+}

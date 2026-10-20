@@ -9,7 +9,9 @@ A working **official Stellar Anchor Platform 2.11.2 → Stellar Testnet USDC →
 - [Verified payment evidence](docs/verified-demo.mdx)
 - [Official Anchor Platform setup](platform/README.md)
 
-Current temporary public origin: **https://9239-88-86-232-107.ngrok-free.app**. It depends on this Mac, the running services and the ngrok tunnel; it is not permanent hosting.
+Hosted API: **https://sandbox-api.nostro.finance**. Run the browser-only walkthrough at **https://nostro.mintlify.site/quickstart**. The demo runs on OVH independently of the development computer. See [deployment and recovery instructions](deploy/README.md).
+
+Canonical source: private repository `laminesabodala/nostro-anchor-demo`. Mintlify sources are also saved in `laminesabodala/nostro-anchor-docs`; the hosted Mintlify editor remains the publishing source.
 
 ## What the demo proves
 
@@ -30,11 +32,12 @@ Use Node 24, Docker Desktop and an authorized PI-SPI sandbox configuration. From
 
 ```sh
 npm ci --ignore-scripts
+export PISPI_CONFIG_FILE=/absolute/path/to/private/providers.json
 node platform/prepare.cjs
 node platform/fund-testnet.cjs
 # Obtain Circle Testnet USDC for the generated sender if needed.
 docker compose -f platform/compose.yaml up -d
-node src/server.js
+npm run start:sandbox
 ```
 
 The business service reads PI-SPI credentials from `../../backend/.local-integrations/providers.json` by default. Set `PISPI_CONFIG_FILE` to a private JSON file with a `pispi` object containing `clientId`, `clientSecret` and `apiKey` to use another location. Credentials are never part of the public API or docs.
@@ -59,11 +62,11 @@ Run records and signed transactions are in ignored `.local/`; private keys are i
 | Official Anchor Platform | SEP `127.0.0.1:8088`; private API `127.0.0.1:8089` | Protocols, SEP transactions, observer, events |
 | Official platform storage | Dedicated Docker PostgreSQL/Kafka volumes | AP state and event delivery |
 | Nostro business process | Port 3010; private callbacks require API key | Fixtures, quotes, funding references, payout/reconciliation |
-| Nostro demo storage | `.local/business-db`, embedded PostgreSQL via PGlite | Customers, quotes, funding references, payout attempts and event IDs |
+| Nostro demo storage | `.local/business-db.nosync`, embedded PostgreSQL via PGlite | Customers, quotes, funding references, payout attempts and event IDs |
 | Local signer | `scripts/demo-payment.js` | SEP-10 signing and Testnet payment, persisted before submission |
 | Documentation | `docs/`, `contracts/` | Public protocol contract only |
 
-Only port 8088 is tunneled. Do not expose the internal Platform API, callback service or databases. Payout polling uses the authenticated Platform API and persists the send intent before calling PI-SPI. A timeout never triggers a second submission: it queries the same PI-SPI transaction ID. Unique constraints prevent reusing a quote or Stellar operation for another payout. These controls have tests and real replay evidence, but do not make two independent networks atomic.
+On OVH, Caddy serves HTTPS and proxies only the allowlisted sandbox gateway on port 3011. For a separate local demo, tunnel that gateway only. It proxies public SEP routes to port 8088. Do not expose the internal Platform API, callback service or databases. Payout polling uses the authenticated Platform API and persists the send intent before calling PI-SPI. A timeout never triggers a second submission: it queries the same PI-SPI transaction ID. Unique constraints prevent reusing a quote or Stellar operation for another payout. These controls have tests and real replay evidence, but do not make two independent networks atomic.
 
 A rejected or ambiguous payment remains available for reconciliation; automatic refunds and a review console are outside this demo. The worker uses one process and bounded polling, intentionally suitable for this limited demonstration rather than production scale.
 
@@ -75,7 +78,7 @@ node platform/check.cjs
 node scripts/demo-payment.js callback-payment # Existing verified run on this machine: resume only
 ```
 
-To import into Mintlify, deploy `docs/` as the documentation project or import `contracts/public-openapi.json`. If the tunnel changes, update runtime discovery first, then run:
+To import into Mintlify, deploy `docs/` as the documentation project or import `contracts/public-openapi.json`. If the public origin changes, update runtime discovery first, then run:
 
 ```sh
 ANCHOR_PUBLIC_URL=https://your-new-origin node docs/sync-openapi.cjs
@@ -85,10 +88,20 @@ The fixture accounts and fixed rate are deliberate sandbox limits. New partner b
 
 ## Stop only this demo
 
-Stop the foreground `node src/server.js` process gracefully, stop this demo's ngrok process, and run:
+Stop the foreground `npm run start:sandbox` process gracefully, stop this demo's ngrok process, and run:
 
 ```sh
 docker compose -f platform/compose.yaml stop
 ```
 
 Keep volumes and local state to resume. None of these commands stops the mobile backend.
+
+## Browser-only sandbox
+
+Mintlify visitors start with `POST /sandbox/auth`, register the documented synthetic customers, request a quote, create a payment, call `POST /sandbox/payments/{id}/fund`, then poll SEP-31 status. The server signs a real SEP-10 challenge and sponsors the quoted Testnet payment. No reviewer-side helper or wallet is needed.
+
+Funding is restricted to the documented fixtures and 0.2–5 Testnet USDC / 100–2500 whole virtual XOF, with a durable 50-payment global budget. Signed transactions are saved before submission; retries reconcile the same hash. Expired transactions are replaced only after Horizon confirms their validity window has ended and their sequence remains unused. The shared demo account is for synthetic data only.
+
+The gateway and business service run in one process on OVH, with automatic restart and encrypted daily backups. Local copies using the hosted wallets and payment history must remain stopped to avoid competing payment processors. The database automatically moves from the former `business-db` path to `business-db.nosync` to avoid macOS cloud offloading. Do not reset payment state to retry.
+
+Verified through Mintlify on 2026-10-20: payment `27686fc1-07ad-45a3-80df-d5114a7656ce`, Stellar hash `1045b31d8539dc7b95127efa3074c50213d1307c208abc6082689bfcc9d3c68d`, PI-SPI reference `ESNB99920261020102838FIvKDShYSEMEii`, status `completed`.

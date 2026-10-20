@@ -1,46 +1,16 @@
 {
-  "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
-  "name": "Nostro Anchor Sandbox",
+  "name": "Nostro Anchor API",
   "colors": {
     "primary": "#2855FF",
     "light": "#4671FF",
     "dark": "#1940D5"
   },
-  "navigation": {
-    "tabs": [
-      {
-        "tab": "Start here",
-        "groups": [
-          {
-            "group": "Sandbox",
-            "pages": [
-              "index",
-              "live-demo",
-              "quickstart",
-              "authentication",
-              "payment-lifecycle",
-              "limits-and-errors",
-              "verified-demo"
-            ]
-          }
-        ]
-      },
-      {
-        "tab": "API reference",
-        "groups": [
-          {
-            "group": "Public Stellar APIs",
-            "openapi": "/openapi.json"
-          }
-        ]
-      }
-    ]
-  },
   "api": {
+    "openapi": "openapi.json",
     "playground": {
       "display": "interactive",
-      "proxy": false
+      "proxy": true
     },
     "examples": {
       "languages": [
@@ -49,5 +19,103 @@
       ],
       "prefill": true
     }
+  },
+  "navbar": {
+    "links": [],
+    "primary": {
+      "type": "button",
+      "label": "Run a payment",
+      "href": "/quickstart"
+    }
+  },
+  "footer": {
+    "socials": {}
+  },
+  "contextual": {
+    "options": [
+      "copy",
+      "view",
+      "chatgpt",
+      "claude",
+      "perplexity",
+      "mcp",
+      "cursor",
+      "vscode"
+    ],
+    "display": "header"
+  },
+  "$schema": "https://mintlify.com/docs.json",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Start here",
+        "groups": [
+          {
+            "group": "Sandbox demonstration",
+            "pages": [
+              "index",
+              "quickstart",
+              "test-beneficiaries"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API reference",
+        "openapi": "/openapi.json",
+        "groups": [
+          {
+            "group": "1. Start demo",
+            "pages": [
+              "POST /sandbox/auth"
+            ]
+          },
+          {
+            "group": "2. Register customers",
+            "pages": [
+              "PUT /sep12/customer",
+              "GET /sep12/customer"
+            ]
+          },
+          {
+            "group": "3. Get a quote",
+            "pages": [
+              "POST /sep38/quote"
+            ]
+          },
+          {
+            "group": "4. Create payment",
+            "pages": [
+              "POST /sep31/transactions"
+            ]
+          },
+          {
+            "group": "5. Fund and track",
+            "pages": [
+              "POST /sandbox/payments/{id}/fund",
+              "GET /sep31/transactions/{id}"
+            ]
+          },
+          {
+            "group": "Standard authentication",
+            "pages": [
+              "GET /auth",
+              "POST /auth"
+            ]
+          },
+          {
+            "group": "Additional endpoints",
+            "pages": [
+              "GET /.well-known/stellar.toml",
+              "GET /sep31/info",
+              "GET /sep38/info",
+              "GET /sep38/prices",
+              "GET /sep38/price",
+              "GET /sep38/quote/{quote_id}"
+            ]
+          }
+        ]
+      }
+    ]
   }
 }

@@ -1,0 +1,61 @@
+---
+title: "Test beneficiaries"
+description: "Reusable bank-account and mobile-money details for sandbox payments."
+---
+
+Choose one receiver, then follow [Run a payment](/quickstart). Use these test profiles only.
+
+## Bank account
+
+Select **BankReceiver** in [Register a customer](/api-reference/customers/register-a-customer?playground=open):
+
+```json
+{
+  "account": "<account from your session>",
+  "memo": "bimao-bank-amina-v1",
+  "memo_type": "text",
+  "type": "sep31-receiver",
+  "first_name": "Amina",
+  "last_name": "Diop",
+  "bank_number": "BIMAO_SANDBOX",
+  "bank_account_number": "31432"
+}
+```
+
+Choose `bank_account` in the quote. A second bank profile is **Moussa Ndiaye**, account **41625**, with memo `bimao-bank-moussa-v1` and the same bank code.
+
+## Mobile money
+
+Select **WalletReceiver**:
+
+```json
+{
+  "account": "<account from your session>",
+  "memo": "eme-wallet-lamine-v1",
+  "memo_type": "text",
+  "type": "sep31-receiver",
+  "first_name": "Lamine",
+  "last_name": "Tall",
+  "mobile_money_provider": "PI_SPI_EME_CI_SANDBOX",
+  "mobile_money_number": "+2250700000000"
+}
+```
+
+Choose `mobile_money` in the quote. This test number selects the EME sandbox account; no SMS is sent.
+
+## Expected result
+
+Choose **100–2,500 XOF**. After funding, the receiving account is credited and the payment becomes `completed`. You can repeat a payment using a fresh quote. Retrying an existing payment does not send it twice.
+
+## Error cases
+
+| Input | Result |
+| --- | --- |
+| Unknown institution, account or wallet | `400`: unsupported destination |
+| Name does not match the profile | `400`: name mismatch |
+| Bank and wallet fields in one request | `400`: select one destination |
+| Quote method differs from receiver | `400`: delivery method mismatch |
+| More than 2,500 XOF or less than 100 XOF | `400`: amount outside the limits |
+| Quote reused with different instructions | `409`: quote already used |
+
+The [sandbox overview](/#about-this-sandbox) explains the underlying test accounts.

@@ -1,17 +1,7 @@
 "use strict";
 const { randomUUID } = require("node:crypto");
-const FIXTURES = [
-  {
-    first_name: "Amina",
-    last_name: "Diop",
-    alias: "f77fdb95-7053-4389-bd45-b3bba0311c7c",
-  },
-  {
-    first_name: "Moussa",
-    last_name: "Ndiaye",
-    alias: "6632f81a-6fbc-4b68-8ddc-c7e3a24cda40",
-  },
-];
+const { isDeepStrictEqual } = require("node:util");
+const { FIXTURES, parseDestination, approvedDestination, recipientFields } = require("./destinations");
 const bad = (message, statusCode = 400) =>
   Object.assign(new Error(message), { statusCode });
 function amountUnits(value) {
@@ -31,6 +21,8 @@ function createBusiness({ db, config }) {
   };
   async function getCustomer(q) {
     if (q.account || !q.id) allowed(q.account);
+    if (q.id && !/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(q.id))
+      throw bad("Customer not found", 404);
     let r;
     if (q.id)
       r = (
@@ -47,24 +39,29 @@ function createBusiness({ db, config }) {
         )
       ).rows[0];
     if (r && q.type && r.type !== q.type) throw bad("Customer type mismatch");
+    if (!r && q.id) throw bad("Customer not found", 404);
     if (!r)
       return {
         status: "NEEDS_INFO",
-        fields: {
+        fields: q.type === "sep31-receiver" ? recipientFields() : {
           first_name: {
             type: "string",
-            description: "Synthetic demo first name",
+            description: "Sender first name",
           },
           last_name: {
             type: "string",
-            description: "Synthetic demo last name",
+            description: "Sender last name",
           },
         },
       };
+    if (r.type === "sep31-receiver" && !approvedDestination(r.destination))
+      return { id: r.id, status: "NEEDS_INFO",
+        message: "Legacy alias recipient. Register a new account-number recipient with a new memo.",
+        fields: recipientFields() };
     return {
       id: r.id,
       status: "ACCEPTED",
-      message: "Synthetic sandbox fixture only; no live KYC performed.",
+      message: "Customer ready for sandbox payments.",
     };
   }
   async function putCustomer(q) {
@@ -73,14 +70,9 @@ function createBusiness({ db, config }) {
       throw bad("Unsupported customer type");
     if (typeof q.memo !== "string" || !q.memo || q.memo.length > 128)
       throw bad("A stable customer memo is required");
-    const fixture =
-      q.type === "sep31-receiver"
-        ? FIXTURES.find(
-            (f) => f.first_name === q.first_name && f.last_name === q.last_name,
-          )
-        : null;
-    if (q.type === "sep31-receiver" && !fixture)
-      throw bad("Use an approved synthetic beneficiary fixture");
+    const destination = q.type === "sep31-receiver" ? parseDestination(q) : null;
+    if (q.type === "sep31-sender" && ["bank_number", "bank_account_number", "mobile_money_provider", "mobile_money_number"].some(k => q[k] != null))
+      throw bad("Payout destination fields belong to the receiver, not the sender.");
     if (
       q.type === "sep31-sender" &&
       (q.first_name !== "Demo" || q.last_name !== "Sender")
@@ -99,9 +91,11 @@ function createBusiness({ db, config }) {
         existing.last_name !== q.last_name)
     )
       throw bad("Fixture identity cannot change");
+    if (existing && !isDeepStrictEqual(existing.destination, destination))
+      throw bad("Recipient destination cannot change. Register a new recipient with a new memo.");
     const id = existing?.id || randomUUID();
     await db.query(
-      "INSERT INTO customers(id,account,memo,type,first_name,last_name,alias) VALUES($1,$2,$3,$4,$5,$6,$7) ON CONFLICT(account,memo,type) DO NOTHING",
+      "INSERT INTO customers(id,account,memo,type,first_name,last_name,alias,destination) VALUES($1,$2,$3,$4,$5,$6,NULL,$7) ON CONFLICT(account,memo,type) DO NOTHING",
       [
         id,
         q.account,
@@ -109,24 +103,26 @@ function createBusiness({ db, config }) {
         q.type,
         q.first_name,
         q.last_name,
-        fixture?.alias || null,
+        destination ? JSON.stringify(destination) : null,
       ],
     );
-    return {
-      id: (
+    const saved = (
         await db.query(
-          "SELECT id FROM customers WHERE account=$1 AND memo=$2 AND type=$3",
+          "SELECT * FROM customers WHERE account=$1 AND memo=$2 AND type=$3",
           [q.account, q.memo, q.type],
         )
-      ).rows[0].id,
-    };
+      ).rows[0];
+    if (saved.first_name !== q.first_name || saved.last_name !== q.last_name ||
+        !isDeepStrictEqual(saved.destination, destination))
+      throw bad("This memo already identifies another recipient. Use a new memo.");
+    return { id: saved.id };
   }
   async function rate(q) {
     if (q.type === "firm") allowed(q.client_id);
     if (
       q.sell_asset !== asset ||
       q.buy_asset !== "iso4217:XOF" ||
-      (q.buy_delivery_method && q.buy_delivery_method !== "PI_SPI")
+      (q.buy_delivery_method && !["bank_account", "mobile_money"].includes(q.buy_delivery_method))
     )
       throw bad("Unsupported demo corridor");
     if (!!q.sell_amount === !!q.buy_amount)
@@ -170,8 +166,8 @@ function createBusiness({ db, config }) {
         if (reserved + buy > (config.demoXofBudget || 25000))
           throw bad("Demo liquidity budget exhausted", 503);
         await tx.query(
-          "INSERT INTO quotes(id,account,sell_amount,buy_amount,expires_at) VALUES($1,$2,$3,$4,$5)",
-          [id, q.client_id, result.sell_amount, buy, expiry.toISOString()],
+          "INSERT INTO quotes(id,account,sell_amount,buy_amount,expires_at,delivery_method) VALUES($1,$2,$3,$4,$5,$6)",
+          [id, q.client_id, result.sell_amount, buy, expiry.toISOString(), q.buy_delivery_method || "bank_account"],
         );
       });
       Object.assign(result, { id, expires_at: expiry.toISOString() });

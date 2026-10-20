@@ -2,3 +2,13 @@ node_modules
 .local*/
 .env
 *.log
+
+.env.*
+!.env.example
+.DS_Store
+*.pem
+*.key
+*.p12
+*.pfx
+*.dump
+*.age

@@ -6,6 +6,7 @@ const { createStore } = require("./store");
 const { createBusiness, FIXTURES } = require("./business");
 const { createProcessor } = require("./processor");
 const { createPispiPayout } = require("./pispi");
+const { walletDestination } = require("./destinations");
 async function start() {
   const root = path.resolve(__dirname, "..");
   const config = JSON.parse(
@@ -15,7 +16,7 @@ async function start() {
     config.assetCode !== "USDC" ||
     config.assetIssuer !==
       "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5" ||
-    config.platformUrl !== "http://127.0.0.1:8089"
+    !["http://127.0.0.1:8089", "http://platform:8085"].includes(config.platformUrl)
   )
     throw new Error("Testnet-only configuration required");
   const privateConfig = JSON.parse(
@@ -29,14 +30,24 @@ async function start() {
     ...privateConfig.pispi,
     payerAlias: "9a60b796-ad4c-4cbb-8558-0852a368e71f",
     allowedRecipientAliases: FIXTURES.map((f) => f.alias),
+    allowedRecipientAccounts: [walletDestination().route],
     maxAmountXof: 2500,
   });
   await fs.mkdir(path.join(root, ".local"), { recursive: true, mode: 0o700 });
   const lock = path.join(root, ".local/business.lock");
   await fs.writeFile(lock, String(process.pid), { flag: "wx", mode: 0o600 });
-  let db, app, timer;
+  let db, app, timer, sandbox;
   try {
-    db = await createStore(path.join(root, ".local/business-db"));
+    // Active database pages must not be evicted by macOS iCloud Documents.
+    const dataDirectory = path.join(root, ".local/business-db.nosync");
+    try {
+      await fs.access(dataDirectory);
+    } catch (e) {
+      if (e.code !== "ENOENT") throw e;
+      try { await fs.rename(path.join(root, ".local/business-db"), dataDirectory); }
+      catch (migrationError) { if (migrationError.code !== "ENOENT") throw migrationError; }
+    }
+    db = await createStore(dataDirectory);
     app = require("fastify")({ logger: false, bodyLimit: 65536 });
     const business = createBusiness({ db, config });
     const processor = createProcessor({ db, config, pispi });
@@ -128,10 +139,16 @@ async function start() {
           ),
         );
     await app.listen({ host: "0.0.0.0", port: 3010 });
+    if (process.env.SANDBOX_PLAYGROUND === "true") {
+      const wallet = JSON.parse(await fs.readFile(path.join(root, ".local-platform/sender.json"), "utf8"));
+      sandbox = await require("./sandbox").createSandbox({ db, config, wallet });
+      await sandbox.listen({ host: process.env.SANDBOX_BIND_HOST || "127.0.0.1", port: 3011 });
+    }
     timer = setInterval(run, 2500);
     run();
     async function close() {
       clearInterval(timer);
+      await sandbox?.close();
       await app.close();
       await processor.drain();
       await db.close();
@@ -143,6 +160,7 @@ async function start() {
     return { app, db, processor, close };
   } catch (e) {
     clearInterval(timer);
+    await sandbox?.close();
     await app?.close();
     await db?.close();
     await fs.unlink(lock).catch(() => {});

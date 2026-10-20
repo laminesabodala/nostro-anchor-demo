@@ -2,7 +2,7 @@
 
 This directory is the Mintlify project root. `docs.json` references the generated local `openapi.json`. The canonical source is `../contracts/public-openapi.json`.
 
-Run `node sync-openapi.cjs` after changing the canonical contract. It copies the contract, including the currently configured temporary demo origin. To use an operator-provided demo URL, run:
+Run `node sync-openapi.cjs` after changing the canonical contract. It copies the contract, including the configured hosted demo origin. To use an operator-provided demo URL, run:
 
 ```sh
 ANCHOR_PUBLIC_URL=https://your-current-demo-host.example node sync-openapi.cjs
@@ -12,7 +12,7 @@ Use the actual HTTPS origin of the public gateway, with no API prefix. This chan
 
 Choose this directory as the documentation root when connecting the repository to Mintlify. Only the files in this documentation root and the public specification belong in the publication. Do not add runtime configuration, internal callback schemas, `.local-platform`, private files, database files, signed tokens or receipts containing personal data.
 
-With the Mint CLI installed, run `mint dev` from this directory and validate the OpenAPI document using the project's validator. A working local preview does not prove a public tunnel is reachable.
+With the Mint CLI installed, run `mint dev` from this directory and validate the OpenAPI document using the project's validator. A working local preview does not prove a hosted API is reachable.
 
 Before publishing, verify:
 

@@ -1,0 +1,67 @@
+# Invoke AFTER platform/compose.yaml. Paths resolve relative to platform/.
+services:
+  platform:
+    ports: !reset []
+    environment:
+      callback_api.base_url: http://business:3010/internal/anchor
+    logging: &logs
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+  observer:
+    environment:
+      callback_api.base_url: http://business:3010/internal/anchor
+    logging: *logs
+  db:
+    logging: *logs
+  kafka:
+    logging: *logs
+  business:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+    init: true
+    environment:
+      NODE_ENV: production
+      SANDBOX_BIND_HOST: 0.0.0.0
+      PISPI_CONFIG_FILE: /app/.local-platform/pispi.json
+    volumes:
+      - ../.local-platform:/app/.local-platform:ro
+      - ../.local:/app/.local
+    depends_on:
+      platform:
+        condition: service_started
+    restart: unless-stopped
+    stop_grace_period: 90s
+    read_only: true
+    tmpfs:
+      - /tmp:size=128m,mode=1777
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3010/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      start_period: 60s
+      retries: 3
+    logging: *logs
+  https:
+    image: caddy:2-alpine@sha256:d8542f48d34a9cf4e4c11a478865229840e87e4c96ea3f439101f31a5d35f75f
+    environment:
+      DEMO_DOMAIN: ${DEMO_DOMAIN:?Set DEMO_DOMAIN to the API hostname}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ../deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      business:
+        condition: service_healthy
+    restart: unless-stopped
+    logging: *logs
+volumes:
+  caddy-data:
+  caddy-config:

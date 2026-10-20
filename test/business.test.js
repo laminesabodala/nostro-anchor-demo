@@ -25,6 +25,8 @@ test("customer fixture is stable and scoped to approved partner", async (t) => {
     account: "sender",
     memo: "beneficiary1",
     type: "sep31-receiver",
+    bank_number: "BIMAO_SANDBOX",
+    bank_account_number: "31432",
     first_name: "Amina",
     last_name: "Diop",
   };
@@ -46,6 +48,8 @@ test("SEP31 internal customer callback supplies only id/type", async (t) => {
     account: "sender",
     memo: "receiver",
     type: "sep31-receiver",
+    bank_number: "BIMAO_SANDBOX",
+    bank_account_number: "31432",
     first_name: "Amina",
     last_name: "Diop",
   });
@@ -58,6 +62,12 @@ test("SEP31 internal customer callback supplies only id/type", async (t) => {
     /type mismatch/,
   );
 });
+test("unknown and malformed customer IDs return not found rather than requirements or a database error", async (t) => {
+  const { business } = await setup(t);
+  for (const id of ["not-a-customer", "00000000-0000-4000-8000-000000000000"])
+    await assert.rejects(business.getCustomer({ id }), { statusCode: 404, message: "Customer not found" });
+  assert.equal((await business.getCustomer({ account: "sender", memo: "new", type: "sep31-receiver" })).status, "NEEDS_INFO");
+});
 test("firm quote has exact synthetic FX and zero fees; unsupported corridor rejected", async (t) => {
   const { business } = await setup(t);
   const q = {
@@ -66,7 +76,7 @@ test("firm quote has exact synthetic FX and zero fees; unsupported corridor reje
     sell_asset: "stellar:USDC:issuer",
     buy_asset: "iso4217:XOF",
     sell_amount: "1.0",
-    buy_delivery_method: "PI_SPI",
+    buy_delivery_method: "bank_account",
   };
   const { rate } = await business.rate(q);
   assert.equal(rate.sell_amount, "1.0000000");

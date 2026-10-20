@@ -4,7 +4,9 @@ const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
 const { Keypair } = require('@stellar/stellar-sdk');
-const root = path.resolve(__dirname, '../.local-platform');
+const root = process.env.ANCHOR_RUNTIME_DIR
+  ? path.resolve(process.env.ANCHOR_RUNTIME_DIR)
+  : path.resolve(__dirname, '../.local-platform');
 fs.mkdirSync(root,{recursive:true,mode:0o700});
 const runtimePath=path.join(root,'runtime.json');
 const write=(name,value)=>fs.writeFileSync(path.join(root,name),value,{mode:0o600});
@@ -48,11 +50,11 @@ write('assets.yaml',`assets:
         sender:
           types:
             sep31-sender:
-              description: Synthetic demo sender
+              description: Sandbox sender
         receiver:
           types:
             sep31-receiver:
-              description: Synthetic PI-SPI beneficiary
+              description: BIMAO-simulated bank account or PI-SPI virtual EME account
       fields:
         transaction: {}
     sep38:
@@ -70,9 +72,12 @@ write('assets.yaml',`assets:
         - stellar:USDC:${runtime.assetIssuer}
       country_codes:
         - SEN
+        - CIV
       buy_delivery_methods:
-        - name: PI_SPI
-          description: PI-SPI sandbox virtual-money account credit
+        - name: bank_account
+          description: Bank account
+        - name: mobile_money
+          description: Mobile-money account
     sep38_enabled: true
 `);
 write('stellar.toml',`VERSION="2.7.0"

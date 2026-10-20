@@ -1,5 +1,6 @@
 "use strict";
 const { amountUnits } = require("./business");
+const { createPayments } = require("./payments");
 const HORIZON = "https://horizon-testnet.stellar.org";
 async function json(url, options = {}) {
   const r = await fetch(url, {
@@ -11,6 +12,7 @@ async function json(url, options = {}) {
   return r.json();
 }
 function createProcessor({ db, config, pispi, fetchJson = json }) {
+  const payments = createPayments({ db, config });
   const asset = `stellar:${config.assetCode}:${config.assetIssuer}`;
   const platform = (path, options = {}) =>
     fetchJson(config.platformUrl + path, {
@@ -100,6 +102,11 @@ function createProcessor({ db, config, pispi, fetchJson = json }) {
     let p = (await db.query("SELECT * FROM payouts WHERE id=$1", [t.id]))
       .rows[0];
     if (!p) {
+      // Recover a lost create-response using the immutable reserved request.
+      // Old payments without reservations remain readable but cannot be newly funded.
+      const reserved = (await db.query("SELECT quote_id FROM payment_requests WHERE quote_id=$1", [t.quote_id])).rows[0];
+      if (!reserved) return;
+      const binding = await payments.forTransaction(t);
       if (!t.transfer_received_at || t.status !== "pending_receiver") return;
       const q = (
         await db.query("SELECT * FROM quotes WHERE id=$1 AND account=$2", [
@@ -107,17 +114,13 @@ function createProcessor({ db, config, pispi, fetchJson = json }) {
           config.senderPublicKey,
         ])
       ).rows[0];
-      const c = (
-        await db.query(
-          "SELECT * FROM customers WHERE id=$1 AND account=$2 AND type='sep31-receiver'",
-          [t.customers?.receiver?.id, config.senderPublicKey],
-        )
-      ).rows[0];
-      if (!q || !c?.alias) throw new Error("UNBOUND_CUSTOMER_OR_QUOTE");
+      if (!q) throw new Error("UNBOUND_CUSTOMER_OR_QUOTE");
       const funding = await verifyFunding(t, q);
       const intent = pispi.prepare({
         paymentId: t.id,
-        recipientAlias: c.alias,
+        recipientAlias: binding.destination.route.alias,
+        recipientAccount: binding.destination.route.accountNumber,
+        recipientParticipant: binding.destination.route.accountNumber ? binding.destination.route.participant : undefined,
         amountXof: q.buy_amount,
       });
       await db.query(
@@ -125,7 +128,7 @@ function createProcessor({ db, config, pispi, fetchJson = json }) {
         [
           t.id,
           q.id,
-          c.id,
+          binding.request.receiver_id,
           funding.operation,
           funding.hash,
           q.buy_amount,
@@ -170,7 +173,9 @@ function createProcessor({ db, config, pispi, fetchJson = json }) {
         result.txId !== p.intent.txId ||
         (result.amountXof !== undefined &&
           Number(result.amountXof) !== p.amount_xof) ||
-        (result.recipientAlias && result.recipientAlias !== p.intent.payeAlias)
+        (result.recipientAlias && result.recipientAlias !== p.intent.payeAlias) ||
+        (p.intent.payeOther && result.recipientAccount && result.recipientAccount !== p.intent.payeOther) ||
+        (p.intent.payeParticipant && result.recipientParticipant && result.recipientParticipant !== p.intent.payeParticipant)
       )
         throw new Error("PISPI_RECEIPT_MISMATCH");
       const state =

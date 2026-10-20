@@ -125,11 +125,13 @@ async function main() {
     state.receiverId = (
       await call("/sep12/customer", "PUT", {
         account: wallet.publicKey,
-        memo: "receiver-amina-demo",
+        memo: "bimao-bank-amina-v1",
         memo_type: "text",
         type: "sep31-receiver",
         first_name: "Amina",
         last_name: "Diop",
+        bank_number: "BIMAO_SANDBOX",
+        bank_account_number: "31432",
       })
     ).id;
     await save();
@@ -141,7 +143,7 @@ async function main() {
       sell_asset: asset,
       buy_asset: "iso4217:XOF",
       sell_amount: "0.2",
-      buy_delivery_method: "PI_SPI",
+      buy_delivery_method: "bank_account",
     });
     await save();
   }

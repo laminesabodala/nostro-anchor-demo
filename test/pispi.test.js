@@ -125,3 +125,22 @@ test("duplicate txId response requires reconciliation rather than marking origin
   ]);
   assert.equal((await f.api.send(i)).status, "pending");
 });
+test("direct EME account route is exclusive, allowlisted and receipt-bound", async () => {
+  let sent;
+  const api = createPispiPayout({...config,
+    allowedRecipientAccounts:[{participant:"CIC999",accountNumber:"53774"}],
+    fetchImpl:async(url,options)=>{
+      if(url.includes("oauth2")) return new Response(JSON.stringify({access_token:"test",expires_in:3600}));
+      sent=JSON.parse(options.body);
+      return new Response(JSON.stringify({...sent,statut:"IRREVOCABLE"}));
+    }});
+  const intent = api.prepare({paymentId:"wallet-test",recipientAccount:"53774",recipientParticipant:"CIC999",amountXof:100});
+  assert.equal(intent.payeOther,"53774");
+  assert.equal(intent.payeParticipant,"CIC999");
+  assert.equal(intent.payeAlias,undefined);
+  assert.equal((await api.send(intent)).status,"completed");
+  assert.throws(()=>api.prepare({paymentId:"x",recipientAccount:"other",recipientParticipant:"CIC999",amountXof:100}));
+  assert.throws(()=>api.prepare({paymentId:"x",recipientAlias:"recipient",recipientAccount:"53774",recipientParticipant:"CIC999",amountXof:100}));
+  await assert.rejects(api.send({...intent,payeParticipant:"SNB999"}));
+  await assert.rejects(api.send({...intent,payeIban:"SN12FAKE"}));
+});

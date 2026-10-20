@@ -5,8 +5,9 @@
   "description": "Isolated Stellar Testnet and PI-SPI sandbox demonstration",
   "type": "commonjs",
   "scripts": {
-    "start": "node src/server.js",
-    "test": "node --test test/*.test.js"
+    "start": "node scripts/start-sandbox.js",
+    "test": "node --test test/*.test.js",
+    "start:sandbox": "node scripts/start-sandbox.js"
   },
   "engines": {
     "node": ">=24"

@@ -2,7 +2,7 @@
 
 This is the official `stellar/anchor-platform:2.11.2` runtime, pinned by digest and source tag `release-2.11.2` (`a551cea2fb801d52cce2528be7e60f0620e57bfa`). It runs SEP-1/10/12/31/38, the Platform API, the event processor and the Stellar payment observer. It is not a hand-written substitute for these protocols.
 
-The Compose project `nostro-anchor-demo` has its own PostgreSQL database and Kafka volume. It does not mount or migrate the existing Nostro mobile database. SEP HTTP binds to `127.0.0.1:8088`; the authenticated internal Platform API binds to `127.0.0.1:8089`. Database, Kafka and observer management ports are not published. Only the SEP port may be exposed through a demo HTTPS tunnel.
+The Compose project `nostro-anchor-demo` has its own PostgreSQL database and Kafka volume. It does not mount or migrate the existing Nostro mobile database. SEP HTTP binds to `127.0.0.1:8088`; the authenticated internal Platform API binds to `127.0.0.1:8089`. Database, Kafka and observer management ports are not published. Expose only the allowlisted gateway on port 3011 through HTTPS. See `../deploy/README.md` for the OVH deployment.
 
 ## Start
 
@@ -18,7 +18,7 @@ docker compose -f platform/compose.yaml up -d
 
 `fund-testnet.cjs` uses Stellar Friendbot for XLM and establishes Circle Testnet USDC trustlines. Request test USDC for the sender public key at the official [Circle faucet](https://faucet.circle.com/). Never use Public Network funds or wallet keys.
 
-For HTTPS, start a tunnel to port 8088, update only `publicUrl` in `.local-platform/runtime.json`, run `prepare.cjs` again and recreate the platform/observer services. The SEP-10 home domain and all discovery URLs must match that URL. Do not tunnel port 8089 or the business callback port. A temporary ngrok URL may change after restart.
+For an independent local demo, start the business gateway (`npm run start:sandbox`) and a tunnel to port 3011, update only `publicUrl` in `.local-platform/runtime.json`, run `prepare.cjs` again and recreate the platform/observer services. The SEP-10 home domain and all discovery URLs must match that URL. Do not tunnel the internal Platform API, the business callback port, or the raw SEP server. A temporary ngrok URL may change after restart.
 
 The business server must listen on port 3010 and implement the private callback base `http://host.docker.internal:3010/internal/anchor`. AP authenticates callbacks with `X-Api-Key: callbackApiKey`; requests to the private Platform API require `X-Api-Key: platformApiKey`. Both keys are generated locally.
 
@@ -28,9 +28,9 @@ The business server must listen on port 3010 and implement the private callback 
 - One distribution account represents the bank's demo settlement wallet.
 - Only the configured custodial sender wallet is approved by Nostro's business layer.
 - SEP-12 types `sep31-sender` and `sep31-receiver` use synthetic identities.
-- SEP-38 asset pair: Circle Testnet USDC → `iso4217:XOF`, delivery method `PI_SPI`.
+- SEP-38 asset pair: Circle Testnet USDC → `iso4217:XOF`, delivery methods `bank_account` and `mobile_money`.
 - Firm quotes required; fixed fictional rate and 0.2–5 USDC limit enforced by the business callback. AP 2.11.2's published `min_amount` is an integer, so `/sep31/info` shows 0; the callback rejects quotes below 0.2.
-- SEP-31 transaction fields are empty: the registered receiver identifies its allowlisted PI-SPI alias.
+- SEP-31 transaction fields are empty: the registered receiver selects an immutable account destination; each payment snapshots it before funding.
 - AP creates `pending_sender` transactions and asks Nostro's authenticated `GET /internal/anchor/unique_address?transaction_id=...` callback for the destination account and unique memo. Nostro persists this immutable binding before returning it, so manual SEP requests and the sender script follow the same flow. The official observer associates received payments with those transactions. Nostro verifies funding before initiating virtual-money payout.
 - Kafka delivers internal events; callbacks are authenticated with the shared API key. Business processing must be idempotent and reconcile uncertain bank responses before retrying.
 

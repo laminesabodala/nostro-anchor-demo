@@ -2,16 +2,19 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Nostro Anchor Sandbox \u2014 Public API",
-    "version": "0.1.0",
-    "description": "Stellar Testnet and PI-SPI virtual-money demonstration. Pinned official Anchor Platform 2.11.2 (a551cea2fb801d52cce2528be7e60f0620e57bfa). This is the enabled demo surface, not the complete latest SEP specification. No real funds, real FX, bank endorsement or production settlement. The public origin is a temporary demonstration tunnel; it can change or become unavailable. Responses use protocol-native formats; no mobile API envelope."
+    "version": "0.4.2",
+    "description": "Send payments to bank accounts and mobile-money accounts through Stellar Anchor Platform. Use the published test beneficiaries in this sandbox."
   },
   "servers": [
     {
-      "url": "https://9239-88-86-232-107.ngrok-free.app",
-      "description": "Temporary operator-run Stellar Testnet / PI-SPI sandbox gateway. Availability depends on the local demonstration stack; no real funds."
+      "url": "https://sandbox-api.nostro.finance",
+      "description": "Hosted Stellar Testnet / PI-SPI sandbox. No real funds."
     }
   ],
   "tags": [
+    {
+      "name": "Sandbox"
+    },
     {
       "name": "Discovery"
     },
@@ -50,29 +53,18 @@
               "text/plain": {
                 "schema": {
                   "type": "string"
-                }
+                },
+                "example": "VERSION=\"2.7.0\"\nNETWORK_PASSPHRASE=\"Test SDF Network ; September 2015\"\nSIGNING_KEY=\"GDS2YVPCIY3UOQDP42LITYLZA6K5SDA7TE3EKWGXV7ZKFKGPEDPVFE7W\"\nWEB_AUTH_ENDPOINT=\"https://sandbox-api.nostro.finance/auth\"\nKYC_SERVER=\"https://sandbox-api.nostro.finance/sep12\"\nDIRECT_PAYMENT_SERVER=\"https://sandbox-api.nostro.finance/sep31\"\nANCHOR_QUOTE_SERVER=\"https://sandbox-api.nostro.finance/sep38\"\n[DOCUMENTATION]\nORG_NAME=\"Nostro Testnet Demonstration\"\nORG_DESCRIPTION=\"Synthetic customers, Circle test USDC and PI-SPI virtual money only. No real bank deposits.\"\n[[CURRENCIES]]\ncode=\"USDC\"\nissuer=\"GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5\"\nis_asset_anchored=false\ndesc=\"Circle Testnet USDC. No monetary value.\"\n"
               },
               "text/plain; charset=utf-8": {
                 "schema": {
                   "type": "string"
-                }
+                },
+                "example": "VERSION=\"2.7.0\"\nNETWORK_PASSPHRASE=\"Test SDF Network ; September 2015\"\nSIGNING_KEY=\"GDS2YVPCIY3UOQDP42LITYLZA6K5SDA7TE3EKWGXV7ZKFKGPEDPVFE7W\"\nWEB_AUTH_ENDPOINT=\"https://sandbox-api.nostro.finance/auth\"\nKYC_SERVER=\"https://sandbox-api.nostro.finance/sep12\"\nDIRECT_PAYMENT_SERVER=\"https://sandbox-api.nostro.finance/sep31\"\nANCHOR_QUOTE_SERVER=\"https://sandbox-api.nostro.finance/sep38\"\n[DOCUMENTATION]\nORG_NAME=\"Nostro Testnet Demonstration\"\nORG_DESCRIPTION=\"Synthetic customers, Circle test USDC and PI-SPI virtual money only. No real bank deposits.\"\n[[CURRENCIES]]\ncode=\"USDC\"\nissuer=\"GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5\"\nis_asset_anchored=false\ndesc=\"Circle Testnet USDC. No monetary value.\"\n"
               }
             }
           }
-        },
-        "parameters": [
-          {
-            "name": "ngrok-skip-browser-warning",
-            "in": "header",
-            "required": false,
-            "description": "Temporary sandbox tunnel header; included by the playground.",
-            "schema": {
-              "type": "string",
-              "default": "1"
-            },
-            "example": "1"
-          }
-        ]
+        }
       }
     },
     "/auth": {
@@ -90,6 +82,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Challenge"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Authentication challenge",
+                    "description": "The transaction is a dynamic base64 XDR value; this labelled placeholder cannot be signed or submitted. Use the live response, or POST /sandbox/auth for the browser demo.",
+                    "value": {
+                      "transaction": "BASE64_XDR_FROM_GET_AUTH",
+                      "network_passphrase": "Test SDF Network ; September 2015"
+                    }
+                  }
                 }
               }
             }
@@ -100,6 +102,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Invalid request; check the required fields."
+                    }
+                  }
                 }
               }
             }
@@ -110,6 +121,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Unauthorized"
+                    }
+                  }
                 }
               }
             }
@@ -120,6 +140,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Forbidden"
+                    }
+                  }
                 }
               }
             }
@@ -130,6 +159,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Not found"
+                    }
+                  }
                 }
               }
             }
@@ -140,7 +178,25 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Sandbox request limit reached; retry later."
+                    }
+                  }
                 }
+              }
+            },
+            "headers": {
+              "Retry-After": {
+                "description": "When supplied, wait this many seconds before retrying.",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "60"
               }
             }
           },
@@ -150,6 +206,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "internal server error"
+                    }
+                  }
                 }
               }
             }
@@ -160,6 +225,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Sandbox temporarily unavailable; retry the same payment."
+                    }
+                  }
                 }
               }
             }
@@ -198,17 +272,6 @@
             "schema": {
               "type": "string"
             }
-          },
-          {
-            "name": "ngrok-skip-browser-warning",
-            "in": "header",
-            "required": false,
-            "description": "Temporary sandbox tunnel header; included by the playground.",
-            "schema": {
-              "type": "string",
-              "default": "1"
-            },
-            "example": "1"
           }
         ]
       },
@@ -226,6 +289,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Token"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "SEP-10 token",
+                    "description": "Token placeholder only. Never publish or reuse an issued bearer token. Start a sandbox session to obtain a real demo token.",
+                    "value": {
+                      "token": "SEP10_JWT_FROM_LIVE_RESPONSE"
+                    }
+                  }
                 }
               }
             }
@@ -236,6 +308,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Invalid request; check the required fields."
+                    }
+                  }
                 }
               }
             }
@@ -246,6 +327,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Unauthorized"
+                    }
+                  }
                 }
               }
             }
@@ -256,6 +346,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Forbidden"
+                    }
+                  }
                 }
               }
             }
@@ -266,6 +365,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Not found"
+                    }
+                  }
                 }
               }
             }
@@ -276,7 +384,25 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Sandbox request limit reached; retry later."
+                    }
+                  }
                 }
+              }
+            },
+            "headers": {
+              "Retry-After": {
+                "description": "When supplied, wait this many seconds before retrying.",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "60"
               }
             }
           },
@@ -286,6 +412,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "internal server error"
+                    }
+                  }
                 }
               }
             }
@@ -296,6 +431,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Sandbox temporarily unavailable; retry the same payment."
+                    }
+                  }
                 }
               }
             }
@@ -311,20 +455,7 @@
               }
             }
           }
-        },
-        "parameters": [
-          {
-            "name": "ngrok-skip-browser-warning",
-            "in": "header",
-            "required": false,
-            "description": "Temporary sandbox tunnel header; included by the playground.",
-            "schema": {
-              "type": "string",
-              "default": "1"
-            },
-            "example": "1"
-          }
-        ]
+        }
       }
     },
     "/sep12/customer": {
@@ -334,7 +465,7 @@
         "tags": [
           "Customers"
         ],
-        "description": "Use an existing id or the sending account and customer memo. Query before submission to discover required fields.",
+        "description": "Pass a customer id to check its status. ACCEPTED means the customer can be used in a payment. Without an id, this returns the fields needed for registration.",
         "responses": {
           "200": {
             "description": "Successful response.",
@@ -342,6 +473,67 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Customer"
+                },
+                "examples": {
+                  "Accepted": {
+                    "summary": "Accepted fixture",
+                    "description": "Observed from the running test fixture. Acceptance does not represent live KYC.",
+                    "value": {
+                      "id": "35eae2f3-0ad6-4362-a3c3-7f2230b3ff61",
+                      "status": "ACCEPTED",
+                      "message": "Customer ready for sandbox payments."
+                    }
+                  },
+                  "NeedsInfo": {
+                    "summary": "First request: missing information",
+                    "description": "Receiver requirements example. Choose one complete destination pair.",
+                    "value": {
+                      "status": "NEEDS_INFO",
+                      "fields": {
+                        "first_name": {
+                          "type": "string",
+                          "description": "Virtual fixture first name."
+                        },
+                        "last_name": {
+                          "type": "string",
+                          "description": "Virtual fixture last name."
+                        },
+                        "bank_number": {
+                          "type": "string",
+                          "optional": true,
+                          "choices": [
+                            "BIMAO_SANDBOX"
+                          ],
+                          "description": "Required with bank_account_number; omit wallet fields."
+                        },
+                        "bank_account_number": {
+                          "type": "string",
+                          "optional": true,
+                          "choices": [
+                            "31432",
+                            "41625"
+                          ],
+                          "description": "31432 Amina Diop; 41625 Moussa Ndiaye."
+                        },
+                        "mobile_money_provider": {
+                          "type": "string",
+                          "optional": true,
+                          "choices": [
+                            "PI_SPI_EME_CI_SANDBOX"
+                          ],
+                          "description": "Required with mobile_money_number; omit bank fields."
+                        },
+                        "mobile_money_number": {
+                          "type": "string",
+                          "optional": true,
+                          "choices": [
+                            "+2250700000000"
+                          ],
+                          "description": "Test number mapped to CIC999/53774, Lamine Tall."
+                        }
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -352,6 +544,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Invalid request; check the required fields."
+                    }
+                  }
                 }
               }
             }
@@ -362,6 +563,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Unauthorized"
+                    }
+                  }
                 }
               }
             }
@@ -372,6 +582,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Forbidden"
+                    }
+                  }
                 }
               }
             }
@@ -382,6 +601,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Customer not found"
+                    }
+                  }
                 }
               }
             }
@@ -392,7 +620,25 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Sandbox request limit reached; retry later."
+                    }
+                  }
                 }
+              }
+            },
+            "headers": {
+              "Retry-After": {
+                "description": "When supplied, wait this many seconds before retrying.",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "60"
               }
             }
           },
@@ -402,6 +648,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "internal server error"
+                    }
+                  }
                 }
               }
             }
@@ -412,6 +667,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Sandbox temporarily unavailable; retry the same payment."
+                    }
+                  }
                 }
               }
             }
@@ -477,27 +741,16 @@
             "schema": {
               "type": "string"
             }
-          },
-          {
-            "name": "ngrok-skip-browser-warning",
-            "in": "header",
-            "required": false,
-            "description": "Temporary sandbox tunnel header; included by the playground.",
-            "schema": {
-              "type": "string",
-              "default": "1"
-            },
-            "example": "1"
           }
         ]
       },
       "put": {
         "operationId": "putCustomer",
-        "summary": "Register or update a synthetic customer",
+        "summary": "Register a customer",
         "tags": [
           "Customers"
         ],
-        "description": "A 202 response returns the customer ID. Read status separately and wait for ACCEPTED. Demo recipients must match the configured Amina Diop or Moussa Ndiaye fixture.",
+        "description": "Register the sender first, then the receiver. The sender is the person sending money; the receiver owns the destination bank account or wallet. Select Sender, BankReceiver or WalletReceiver, and enter the account returned by your session. Save each returned id as sender_id or receiver_id.",
         "responses": {
           "202": {
             "description": "Successful response.",
@@ -505,6 +758,26 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CustomerCreated"
+                },
+                "examples": {
+                  "BankReceiver": {
+                    "summary": "Bank receiver registered",
+                    "value": {
+                      "id": "35eae2f3-0ad6-4362-a3c3-7f2230b3ff61"
+                    }
+                  },
+                  "WalletReceiver": {
+                    "summary": "Wallet receiver registered",
+                    "value": {
+                      "id": "6edb8438-c302-4b0a-ab79-b0f9c79d3c2a"
+                    }
+                  },
+                  "Sender": {
+                    "summary": "Sender registered",
+                    "value": {
+                      "id": "14f174b6-2b31-4686-9e11-a4754423a1dd"
+                    }
+                  }
                 }
               }
             }
@@ -515,6 +788,26 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "UnsupportedBank": {
+                    "summary": "Other banks rejected",
+                    "value": {
+                      "error": "Unsupported institution. Use BIMAO_SANDBOX."
+                    }
+                  },
+                  "UnsupportedAccount": {
+                    "summary": "Unknown bank account rejected",
+                    "value": {
+                      "error": "Unsupported sandbox account. Use 31432 (Amina Diop) or 41625 (Moussa Ndiaye). IBAN payouts are not enabled in this demo."
+                    }
+                  },
+                  "MixedDestination": {
+                    "summary": "Choose one destination",
+                    "value": {
+                      "error": "Provide either bank-account fields or mobile-money fields, never both."
+                    }
+                  }
                 }
               }
             }
@@ -525,6 +818,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Unauthorized"
+                    }
+                  }
                 }
               }
             }
@@ -535,6 +837,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Forbidden"
+                    }
+                  }
                 }
               }
             }
@@ -545,6 +856,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Not found"
+                    }
+                  }
                 }
               }
             }
@@ -555,7 +875,25 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Sandbox request limit reached; retry later."
+                    }
+                  }
                 }
+              }
+            },
+            "headers": {
+              "Retry-After": {
+                "description": "When supplied, wait this many seconds before retrying.",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "60"
               }
             }
           },
@@ -565,6 +903,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "internal server error"
+                    }
+                  }
                 }
               }
             }
@@ -575,6 +922,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Sandbox temporarily unavailable; retry the same payment."
+                    }
+                  }
                 }
               }
             }
@@ -589,54 +945,56 @@
               },
               "examples": {
                 "Sender": {
-                  "summary": "Sender",
+                  "summary": "1. Demo sender",
                   "value": {
                     "account": "GCZN3RM3P3M3NZH5OS6DHVXZIOGMTW4CIORHBVMRLSA3JASUHKSE4DKI",
-                    "memo": "demo-sender",
+                    "memo": "browser-demo-sender",
                     "memo_type": "text",
                     "type": "sep31-sender",
                     "first_name": "Demo",
                     "last_name": "Sender"
                   }
                 },
-                "Receiver": {
-                  "summary": "Receiver",
+                "BankReceiver": {
+                  "summary": "Bank account",
                   "value": {
                     "account": "GCZN3RM3P3M3NZH5OS6DHVXZIOGMTW4CIORHBVMRLSA3JASUHKSE4DKI",
-                    "memo": "receiver-amina-demo",
+                    "memo": "bimao-bank-amina-v1",
                     "memo_type": "text",
                     "type": "sep31-receiver",
                     "first_name": "Amina",
-                    "last_name": "Diop"
+                    "last_name": "Diop",
+                    "bank_number": "BIMAO_SANDBOX",
+                    "bank_account_number": "31432"
+                  }
+                },
+                "WalletReceiver": {
+                  "summary": "2b. PI-SPI virtual mobile-money account",
+                  "value": {
+                    "account": "GCZN3RM3P3M3NZH5OS6DHVXZIOGMTW4CIORHBVMRLSA3JASUHKSE4DKI",
+                    "memo": "eme-wallet-lamine-v1",
+                    "memo_type": "text",
+                    "type": "sep31-receiver",
+                    "first_name": "Lamine",
+                    "last_name": "Tall",
+                    "mobile_money_provider": "PI_SPI_EME_CI_SANDBOX",
+                    "mobile_money_number": "+2250700000000"
                   }
                 }
               }
             }
           }
-        },
-        "parameters": [
-          {
-            "name": "ngrok-skip-browser-warning",
-            "in": "header",
-            "required": false,
-            "description": "Temporary sandbox tunnel header; included by the playground.",
-            "schema": {
-              "type": "string",
-              "default": "1"
-            },
-            "example": "1"
-          }
-        ]
+        }
       }
     },
     "/sep38/info": {
       "get": {
         "operationId": "getQuoteAssets",
-        "summary": "List quote assets and delivery methods",
+        "summary": "List currencies and delivery methods",
         "tags": [
           "Quotes"
         ],
-        "description": "The configured pair is Testnet USDC to sandbox XOF. Authentication requirements follow this demo deployment.",
+        "description": "Lists the supported currencies and payout methods: bank_account and mobile_money. PI-SPI is the rail used to deliver payments.",
         "responses": {
           "200": {
             "description": "Successful response.",
@@ -644,6 +1002,35 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/QuoteInfo"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Available assets and route",
+                    "description": "Configured assets and the bank_account and mobile_money delivery methods. Only the documented fixed sandbox beneficiaries are enabled.",
+                    "value": {
+                      "assets": [
+                        {
+                          "asset": "stellar:USDC:GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5"
+                        },
+                        {
+                          "asset": "iso4217:XOF",
+                          "country_codes": [
+                            "SEN"
+                          ],
+                          "buy_delivery_methods": [
+                            {
+                              "name": "bank_account",
+                              "description": "Bank account"
+                            },
+                            {
+                              "name": "mobile_money",
+                              "description": "Mobile-money account"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  }
                 }
               }
             }
@@ -654,6 +1041,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Invalid request; check the required fields."
+                    }
+                  }
                 }
               }
             }
@@ -664,6 +1060,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Unauthorized"
+                    }
+                  }
                 }
               }
             }
@@ -674,6 +1079,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Forbidden"
+                    }
+                  }
                 }
               }
             }
@@ -684,6 +1098,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Not found"
+                    }
+                  }
                 }
               }
             }
@@ -694,7 +1117,25 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Sandbox request limit reached; retry later."
+                    }
+                  }
                 }
+              }
+            },
+            "headers": {
+              "Retry-After": {
+                "description": "When supplied, wait this many seconds before retrying.",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "60"
               }
             }
           },
@@ -704,6 +1145,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "internal server error"
+                    }
+                  }
                 }
               }
             }
@@ -714,34 +1164,30 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Sandbox temporarily unavailable; retry the same payment."
+                    }
+                  }
                 }
               }
             }
           }
-        },
-        "parameters": [
-          {
-            "name": "ngrok-skip-browser-warning",
-            "in": "header",
-            "required": false,
-            "description": "Temporary sandbox tunnel header; included by the playground.",
-            "schema": {
-              "type": "string",
-              "default": "1"
-            },
-            "example": "1"
-          }
-        ]
+        }
       }
     },
     "/sep38/prices": {
       "get": {
         "operationId": "getIndicativePrices",
-        "summary": "List indicative buy-asset prices",
+        "summary": "Compare exchange rates",
         "tags": [
           "Quotes"
         ],
-        "description": "Indicative demo prices do not reserve a quote. Use POST /sep38/quote before creating the payment.",
+        "description": "Optional: compare indicative exchange rates. To make a payment, use POST /sep38/quote instead.",
         "responses": {
           "200": {
             "description": "Successful response.",
@@ -749,6 +1195,21 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Prices"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Indicative prices",
+                    "description": "Representative sandbox response. IDs and timestamps are examples; use the values returned by your own requests.",
+                    "value": {
+                      "buy_assets": [
+                        {
+                          "asset": "iso4217:XOF",
+                          "price": "0.002",
+                          "decimals": 7
+                        }
+                      ]
+                    }
+                  }
                 }
               }
             }
@@ -759,6 +1220,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Invalid request; check the required fields."
+                    }
+                  }
                 }
               }
             }
@@ -769,6 +1239,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Unauthorized"
+                    }
+                  }
                 }
               }
             }
@@ -779,6 +1258,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Forbidden"
+                    }
+                  }
                 }
               }
             }
@@ -789,6 +1277,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Not found"
+                    }
+                  }
                 }
               }
             }
@@ -799,7 +1296,25 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Sandbox request limit reached; retry later."
+                    }
+                  }
                 }
+              }
+            },
+            "headers": {
+              "Retry-After": {
+                "description": "When supplied, wait this many seconds before retrying.",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "60"
               }
             }
           },
@@ -809,6 +1324,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "internal server error"
+                    }
+                  }
                 }
               }
             }
@@ -819,6 +1343,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Sandbox temporarily unavailable; retry the same payment."
+                    }
+                  }
                 }
               }
             }
@@ -851,7 +1384,8 @@
             "schema": {
               "type": "string",
               "enum": [
-                "PI_SPI"
+                "bank_account",
+                "mobile_money"
               ]
             }
           },
@@ -865,17 +1399,6 @@
                 "SEN"
               ]
             }
-          },
-          {
-            "name": "ngrok-skip-browser-warning",
-            "in": "header",
-            "required": false,
-            "description": "Temporary sandbox tunnel header; included by the playground.",
-            "schema": {
-              "type": "string",
-              "default": "1"
-            },
-            "example": "1"
           }
         ]
       }
@@ -883,11 +1406,11 @@
     "/sep38/price": {
       "get": {
         "operationId": "getIndicativePrice",
-        "summary": "Preview an indicative price",
+        "summary": "Preview a conversion",
         "tags": [
           "Quotes"
         ],
-        "description": "Provide exactly one of sell_amount and buy_amount. This indicative response has no quote ID or reserved expiry.",
+        "description": "Optional: preview what an amount converts to. This does not reserve a rate or create a payment quote.",
         "responses": {
           "200": {
             "description": "Successful response.",
@@ -895,6 +1418,22 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Price"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Indicative conversion",
+                    "description": "Representative sandbox response. IDs and timestamps are examples; use the values returned by your own requests.",
+                    "value": {
+                      "price": "0.002",
+                      "total_price": "0.002",
+                      "sell_amount": "0.2000000",
+                      "buy_amount": "100",
+                      "fee": {
+                        "total": "0",
+                        "asset": "stellar:USDC:GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5"
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -905,6 +1444,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Invalid request; check the required fields."
+                    }
+                  }
                 }
               }
             }
@@ -915,6 +1463,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Unauthorized"
+                    }
+                  }
                 }
               }
             }
@@ -925,6 +1482,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Forbidden"
+                    }
+                  }
                 }
               }
             }
@@ -935,6 +1501,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Not found"
+                    }
+                  }
                 }
               }
             }
@@ -945,7 +1520,25 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Sandbox request limit reached; retry later."
+                    }
+                  }
                 }
+              }
+            },
+            "headers": {
+              "Retry-After": {
+                "description": "When supplied, wait this many seconds before retrying.",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "60"
               }
             }
           },
@@ -955,6 +1548,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "internal server error"
+                    }
+                  }
                 }
               }
             }
@@ -965,6 +1567,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Sandbox temporarily unavailable; retry the same payment."
+                    }
+                  }
                 }
               }
             }
@@ -1027,7 +1638,8 @@
             "schema": {
               "type": "string",
               "enum": [
-                "PI_SPI"
+                "bank_account",
+                "mobile_money"
               ]
             }
           },
@@ -1041,17 +1653,6 @@
                 "SEN"
               ]
             }
-          },
-          {
-            "name": "ngrok-skip-browser-warning",
-            "in": "header",
-            "required": false,
-            "description": "Temporary sandbox tunnel header; included by the playground.",
-            "schema": {
-              "type": "string",
-              "default": "1"
-            },
-            "example": "1"
           }
         ]
       }
@@ -1059,11 +1660,11 @@
     "/sep38/quote": {
       "post": {
         "operationId": "createQuote",
-        "summary": "Request a firm sandbox quote",
+        "summary": "Get a payment quote",
         "tags": [
           "Quotes"
         ],
-        "description": "Reserve the demo conversion amounts until expires_at. Fees are zero. PI-SPI virtual funds must already be available; Stellar assets do not create fiat liquidity.",
+        "description": "Choose how much to send in sell_amount, or how much the receiver should receive in buy_amount. Supply only one. Payments support 100\u20132500 XOF (0.2\u20135 USDC), in whole XOF. Match buy_delivery_method to the receiver. Save id and sell_amount for payment creation. The rate is 500 XOF per USDC and the service fee is zero.",
         "responses": {
           "201": {
             "description": "Successful response.",
@@ -1071,6 +1672,26 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Quote"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Firm quote",
+                    "description": "Historical sandbox example. Its ID and expiry are not reusable; request a new quote for each payment.",
+                    "value": {
+                      "id": "a39cb4cc-7690-4054-bf19-c9da1857e47b",
+                      "expires_at": "2026-10-20T10:34:41.516Z",
+                      "price": "0.002",
+                      "total_price": "0.002",
+                      "sell_asset": "stellar:USDC:GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5",
+                      "sell_amount": "0.2",
+                      "buy_asset": "iso4217:XOF",
+                      "buy_amount": "100",
+                      "fee": {
+                        "total": "0",
+                        "asset": "stellar:USDC:GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5"
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -1081,6 +1702,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Invalid request; check the required fields."
+                    }
+                  }
                 }
               }
             }
@@ -1091,6 +1721,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Unauthorized"
+                    }
+                  }
                 }
               }
             }
@@ -1101,6 +1740,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Forbidden"
+                    }
+                  }
                 }
               }
             }
@@ -1111,6 +1759,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Not found"
+                    }
+                  }
                 }
               }
             }
@@ -1121,7 +1778,25 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Sandbox request limit reached; retry later."
+                    }
+                  }
                 }
+              }
+            },
+            "headers": {
+              "Retry-After": {
+                "description": "When supplied, wait this many seconds before retrying.",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "60"
               }
             }
           },
@@ -1131,6 +1806,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "internal server error"
+                    }
+                  }
                 }
               }
             }
@@ -1141,6 +1825,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Sandbox temporarily unavailable; retry the same payment."
+                    }
+                  }
                 }
               }
             }
@@ -1153,29 +1846,31 @@
               "schema": {
                 "$ref": "#/components/schemas/QuoteInput"
               },
-              "example": {
-                "context": "sep31",
-                "sell_asset": "stellar:USDC:GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5",
-                "buy_asset": "iso4217:XOF",
-                "sell_amount": "0.2",
-                "buy_delivery_method": "PI_SPI"
+              "examples": {
+                "BankQuote": {
+                  "summary": "Bank account: 0.2 test USDC \u2192 100 virtual XOF",
+                  "value": {
+                    "context": "sep31",
+                    "sell_asset": "stellar:USDC:GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5",
+                    "buy_asset": "iso4217:XOF",
+                    "sell_amount": "0.2",
+                    "buy_delivery_method": "bank_account"
+                  }
+                },
+                "WalletQuote": {
+                  "summary": "Mobile money: same amount, wallet delivery method",
+                  "value": {
+                    "context": "sep31",
+                    "sell_asset": "stellar:USDC:GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5",
+                    "buy_asset": "iso4217:XOF",
+                    "sell_amount": "0.2",
+                    "buy_delivery_method": "mobile_money"
+                  }
+                }
               }
             }
           }
-        },
-        "parameters": [
-          {
-            "name": "ngrok-skip-browser-warning",
-            "in": "header",
-            "required": false,
-            "description": "Temporary sandbox tunnel header; included by the playground.",
-            "schema": {
-              "type": "string",
-              "default": "1"
-            },
-            "example": "1"
-          }
-        ]
+        }
       }
     },
     "/sep38/quote/{quote_id}": {
@@ -1193,6 +1888,26 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Quote"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Firm quote",
+                    "description": "Historical sandbox example. Its ID and expiry are not reusable; request a new quote for each payment.",
+                    "value": {
+                      "id": "a39cb4cc-7690-4054-bf19-c9da1857e47b",
+                      "expires_at": "2026-10-20T10:34:41.516Z",
+                      "price": "0.002",
+                      "total_price": "0.002",
+                      "sell_asset": "stellar:USDC:GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5",
+                      "sell_amount": "0.2",
+                      "buy_asset": "iso4217:XOF",
+                      "buy_amount": "100",
+                      "fee": {
+                        "total": "0",
+                        "asset": "stellar:USDC:GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5"
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -1203,6 +1918,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Invalid request; check the required fields."
+                    }
+                  }
                 }
               }
             }
@@ -1213,6 +1937,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Unauthorized"
+                    }
+                  }
                 }
               }
             }
@@ -1223,6 +1956,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Forbidden"
+                    }
+                  }
                 }
               }
             }
@@ -1233,6 +1975,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Not found"
+                    }
+                  }
                 }
               }
             }
@@ -1243,7 +1994,25 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Sandbox request limit reached; retry later."
+                    }
+                  }
                 }
+              }
+            },
+            "headers": {
+              "Retry-After": {
+                "description": "When supplied, wait this many seconds before retrying.",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "60"
               }
             }
           },
@@ -1253,6 +2022,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "internal server error"
+                    }
+                  }
                 }
               }
             }
@@ -1263,6 +2041,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Sandbox temporarily unavailable; retry the same payment."
+                    }
+                  }
                 }
               }
             }
@@ -1276,17 +2063,6 @@
             "schema": {
               "type": "string"
             }
-          },
-          {
-            "name": "ngrok-skip-browser-warning",
-            "in": "header",
-            "required": false,
-            "description": "Temporary sandbox tunnel header; included by the playground.",
-            "schema": {
-              "type": "string",
-              "default": "1"
-            },
-            "example": "1"
           }
         ]
       }
@@ -1294,11 +2070,11 @@
     "/sep31/info": {
       "get": {
         "operationId": "getPaymentInfo",
-        "summary": "Read supported payout configuration",
+        "summary": "Read payout requirements",
         "tags": [
           "Payments"
         ],
-        "description": "Public discovery for the pinned SEP-31 implementation. Firm quotes are required.",
+        "description": "Lists the supported payment currency and customer requirements. Use a registered receiver from the available test beneficiaries.",
         "responses": {
           "200": {
             "description": "Successful response.",
@@ -1306,6 +2082,44 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/PaymentInfo"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Enabled sandbox service",
+                    "description": "Captured from the running official Anchor Platform. This exposes customer types and asset limits, not a catalogue of every PI-SPI institution.",
+                    "value": {
+                      "receive": {
+                        "USDC": {
+                          "enabled": true,
+                          "quotes_supported": true,
+                          "quotes_required": true,
+                          "fee_fixed": 0,
+                          "fee_percent": 0,
+                          "min_amount": 0,
+                          "max_amount": 5,
+                          "sep12": {
+                            "sender": {
+                              "types": {
+                                "sep31-sender": {
+                                  "description": "Test demo sender"
+                                }
+                              }
+                            },
+                            "receiver": {
+                              "types": {
+                                "sep31-receiver": {
+                                  "description": "Test PI-SPI beneficiary"
+                                }
+                              }
+                            }
+                          },
+                          "fields": {
+                            "transaction": {}
+                          }
+                        }
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -1316,6 +2130,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Invalid request; check the required fields."
+                    }
+                  }
                 }
               }
             }
@@ -1326,6 +2149,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Unauthorized"
+                    }
+                  }
                 }
               }
             }
@@ -1336,6 +2168,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Forbidden"
+                    }
+                  }
                 }
               }
             }
@@ -1346,6 +2187,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Not found"
+                    }
+                  }
                 }
               }
             }
@@ -1356,7 +2206,25 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Sandbox request limit reached; retry later."
+                    }
+                  }
                 }
+              }
+            },
+            "headers": {
+              "Retry-After": {
+                "description": "When supplied, wait this many seconds before retrying.",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "60"
               }
             }
           },
@@ -1366,6 +2234,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "internal server error"
+                    }
+                  }
                 }
               }
             }
@@ -1376,35 +2253,31 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Sandbox temporarily unavailable; retry the same payment."
+                    }
+                  }
                 }
               }
             }
           }
         },
-        "security": [],
-        "parameters": [
-          {
-            "name": "ngrok-skip-browser-warning",
-            "in": "header",
-            "required": false,
-            "description": "Temporary sandbox tunnel header; included by the playground.",
-            "schema": {
-              "type": "string",
-              "default": "1"
-            },
-            "example": "1"
-          }
-        ]
+        "security": []
       }
     },
     "/sep31/transactions": {
       "post": {
         "operationId": "createPayment",
-        "summary": "Create a sandbox payout request",
+        "summary": "Create a payment",
         "tags": [
           "Payments"
         ],
-        "description": "Creation does not send Stellar funds or complete a PI-SPI payment. Save the returned ID. No Idempotency-Key header is advertised by this operation; do not blindly retry ambiguous creates.",
+        "description": "Use sender_id and receiver_id from customer registration, and quote_id from your quote. Copy the quote sell_amount into amount. Creation returns a payment id and funding details; it does not send funds. Repeating the same request returns the same payment. Use a new quote for a new payment.",
         "responses": {
           "201": {
             "description": "Successful response.",
@@ -1412,6 +2285,18 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/PaymentCreated"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Payment created",
+                    "description": "Illustrative prepared response based on a verified payment. Save the id and read status; destination and memo may be absent until preparation completes. Creating a request does not move money.",
+                    "value": {
+                      "id": "27686fc1-07ad-45a3-80df-d5114a7656ce",
+                      "stellar_account_id": "GB5QOQIDOEB3P3JPS2BZRYRCHCONIUGEQUXQKWHKD53ODZCB3ZZNOGHN",
+                      "stellar_memo_type": "hash",
+                      "stellar_memo": "Pf/m8aWdl/7gFpds4rvgxnnDIt9S9goE53PydO+Y0Lo="
+                    }
+                  }
                 }
               }
             }
@@ -1422,6 +2307,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Invalid request; check the required fields."
+                    }
+                  }
                 }
               }
             }
@@ -1432,6 +2326,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Unauthorized"
+                    }
+                  }
                 }
               }
             }
@@ -1442,6 +2345,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Forbidden"
+                    }
+                  }
                 }
               }
             }
@@ -1452,6 +2364,37 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Not found"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Quote expired, already used for different instructions, or creation is being reconciled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "QuoteUsed": {
+                    "value": {
+                      "error": "This quote is already bound to another payment. Request a new quote."
+                    }
+                  },
+                  "Reconciling": {
+                    "value": {
+                      "error": "Payment creation is awaiting reconciliation. Retry this same request; do not fund a second payment."
+                    }
+                  }
                 }
               }
             }
@@ -1462,7 +2405,25 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Sandbox request limit reached; retry later."
+                    }
+                  }
                 }
+              }
+            },
+            "headers": {
+              "Retry-After": {
+                "description": "When supplied, wait this many seconds before retrying.",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "60"
               }
             }
           },
@@ -1472,6 +2433,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "internal server error"
+                    }
+                  }
                 }
               }
             }
@@ -1482,6 +2452,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Sandbox temporarily unavailable; retry the same payment."
+                    }
+                  }
                 }
               }
             }
@@ -1508,30 +2487,17 @@
               }
             }
           }
-        },
-        "parameters": [
-          {
-            "name": "ngrok-skip-browser-warning",
-            "in": "header",
-            "required": false,
-            "description": "Temporary sandbox tunnel header; included by the playground.",
-            "schema": {
-              "type": "string",
-              "default": "1"
-            },
-            "example": "1"
-          }
-        ]
+        }
       }
     },
     "/sep31/transactions/{id}": {
       "get": {
         "operationId": "getPayment",
-        "summary": "Read a payout and its status",
+        "summary": "Read payment status",
         "tags": [
           "Payments"
         ],
-        "description": "Poll until a confirmed outcome. pending_external means the PI-SPI result is not yet confirmed. Fields and references appear as processing advances.",
+        "description": "Read this after funding. completed means the receiving account has been credited. pending_external means payout confirmation is still pending. external_transaction_id is the PI-SPI payout reference. Open transaction.stellar_explorer_url to view this payment\u2019s funding transaction on Stellar Testnet; it is null until a transaction hash is available.",
         "responses": {
           "200": {
             "description": "Successful response.",
@@ -1539,6 +2505,68 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/PaymentResult"
+                },
+                "examples": {
+                  "BankCompleted": {
+                    "summary": "Verified bank sandbox payout",
+                    "description": "Completed bank payment. Use IDs from your own responses.",
+                    "value": {
+                      "transaction": {
+                        "id": "bb515274-5ae6-4b29-bd06-a282f4a508eb",
+                        "status": "completed",
+                        "amount_in": "0.2000000",
+                        "amount_in_asset": "stellar:USDC:GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5",
+                        "amount_out": "100",
+                        "amount_out_asset": "iso4217:XOF",
+                        "amount_fee": "0",
+                        "fee_details": {
+                          "total": "0",
+                          "asset": "stellar:USDC:GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5"
+                        },
+                        "quote_id": "fd1e3df3-0b92-4564-81f7-bbec4504f214",
+                        "amount_fee_asset": "stellar:USDC:GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5",
+                        "stellar_account_id": "GB5QOQIDOEB3P3JPS2BZRYRCHCONIUGEQUXQKWHKD53ODZCB3ZZNOGHN",
+                        "stellar_memo": "amS1y668dGtdVrcLa7vcO6W/Pr1LFx9avhXIp0C4mBo=",
+                        "stellar_memo_type": "hash",
+                        "started_at": "2026-10-20T11:16:33.299430Z",
+                        "completed_at": "2026-10-20T11:16:49.686712Z",
+                        "stellar_transaction_id": "ef12bbcfa15057a230c233823ba759d58beb319b96aa72fac5993783a9a7dba7",
+                        "external_transaction_id": "ESNB99920261020111646CL16oXtLKF6N0M",
+                        "required_info_message": "PI-SPI sandbox payout confirmed IRREVOCABLE; virtual funds only.",
+                        "stellar_explorer_url": "https://stellar.expert/explorer/testnet/tx/ef12bbcfa15057a230c233823ba759d58beb319b96aa72fac5993783a9a7dba7"
+                      }
+                    }
+                  },
+                  "WalletCompleted": {
+                    "summary": "Verified PI-SPI EME payout",
+                    "description": "Observed 20 October 2026: CIC999 account 53774, direct account route. Historical IDs.",
+                    "value": {
+                      "transaction": {
+                        "id": "54617caa-49cb-4f26-9bb9-2f7e8afaa346",
+                        "status": "completed",
+                        "amount_in": "0.2000000",
+                        "amount_in_asset": "stellar:USDC:GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5",
+                        "amount_out": "100",
+                        "amount_out_asset": "iso4217:XOF",
+                        "amount_fee": "0",
+                        "fee_details": {
+                          "total": "0",
+                          "asset": "stellar:USDC:GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5"
+                        },
+                        "quote_id": "79f4a959-c847-4733-8ad5-536a1cff45f9",
+                        "amount_fee_asset": "stellar:USDC:GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5",
+                        "stellar_account_id": "GB5QOQIDOEB3P3JPS2BZRYRCHCONIUGEQUXQKWHKD53ODZCB3ZZNOGHN",
+                        "stellar_memo": "tEYSIyoyW1DX+z/TuGaRRcJz5l7wEZsIXUoF8QL+JVk=",
+                        "stellar_memo_type": "hash",
+                        "started_at": "2026-10-20T11:17:12.732821Z",
+                        "completed_at": "2026-10-20T11:17:38.753735Z",
+                        "stellar_transaction_id": "361dd4dc188274593581b703c31a9ade38142dd73b5a51f73efbc3f7b4fe935c",
+                        "external_transaction_id": "ESNB99920261020111724VBwf9KkBib5C2M",
+                        "required_info_message": "PI-SPI sandbox payout confirmed IRREVOCABLE; virtual funds only.",
+                        "stellar_explorer_url": "https://stellar.expert/explorer/testnet/tx/361dd4dc188274593581b703c31a9ade38142dd73b5a51f73efbc3f7b4fe935c"
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -1549,6 +2577,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Invalid request; check the required fields."
+                    }
+                  }
                 }
               }
             }
@@ -1559,6 +2596,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Unauthorized"
+                    }
+                  }
                 }
               }
             }
@@ -1569,6 +2615,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Forbidden"
+                    }
+                  }
                 }
               }
             }
@@ -1579,6 +2634,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Not found"
+                    }
+                  }
                 }
               }
             }
@@ -1589,7 +2653,25 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Sandbox request limit reached; retry later."
+                    }
+                  }
                 }
+              }
+            },
+            "headers": {
+              "Retry-After": {
+                "description": "When supplied, wait this many seconds before retrying.",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "60"
               }
             }
           },
@@ -1599,6 +2681,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "internal server error"
+                    }
+                  }
                 }
               }
             }
@@ -1609,6 +2700,15 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Sandbox temporarily unavailable; retry the same payment."
+                    }
+                  }
                 }
               }
             }
@@ -1622,19 +2722,278 @@
             "schema": {
               "type": "string"
             }
-          },
-          {
-            "name": "ngrok-skip-browser-warning",
-            "in": "header",
-            "required": false,
-            "description": "Temporary sandbox tunnel header; included by the playground.",
-            "schema": {
-              "type": "string",
-              "default": "1"
-            },
-            "example": "1"
           }
         ]
+      }
+    },
+    "/sandbox/auth": {
+      "post": {
+        "operationId": "startSandboxSession",
+        "summary": "Start a sandbox session",
+        "tags": [
+          "Sandbox"
+        ],
+        "security": [],
+        "description": "Start here. No body is needed. Returns a Bearer token and the sending partner Stellar account. Save both; next register the sender and receiver.",
+        "responses": {
+          "200": {
+            "description": "Real Anchor token for the demo sender",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "account": {
+                      "type": "string"
+                    },
+                    "token": {
+                      "type": "string"
+                    },
+                    "environment": {
+                      "type": "string",
+                      "enum": [
+                        "testnet"
+                      ]
+                    },
+                    "sharedDemoAccount": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Demo session",
+                    "description": "Click Send to obtain a current token and account.",
+                    "value": {
+                      "account": "GCZN3RM3P3M3NZH5OS6DHVXZIOGMTW4CIORHBVMRLSA3JASUHKSE4DKI",
+                      "token": "SEP10_JWT_FROM_LIVE_RESPONSE",
+                      "environment": "testnet",
+                      "sharedDemoAccount": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Sandbox request limit reached",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Sandbox request limit reached; retry later."
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Retry-After": {
+                "description": "When supplied, wait this many seconds before retrying.",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "60"
+              }
+            }
+          },
+          "503": {
+            "description": "Sandbox temporarily unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Sandbox temporarily unavailable; retry the same payment."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sandbox/payments/{id}/fund": {
+      "post": {
+        "operationId": "fundSandboxPayment",
+        "summary": "Fund a sandbox payment",
+        "tags": [
+          "Sandbox"
+        ],
+        "description": "Enter the payment ID and Bearer token, then send with no body. The sponsor funds the amount from your quote on Stellar Testnet. Open stellarExplorerUrl from the response to see the transaction on the blockchain. Read payment status to confirm the PI-SPI payout. Retrying the same payment does not send funds twice.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Payment ID returned by POST /sep31/transactions"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Funding confirmed or already completed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "transactionId": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "stellarTransactionId": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "stellarExplorerUrl": {
+                      "type": "string",
+                      "format": "uri",
+                      "nullable": true,
+                      "description": "Direct Stellar Testnet explorer link derived from the transaction hash. Null before the blockchain transaction is known. Nostro sandbox convenience field."
+                    }
+                  }
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Testnet funding confirmed",
+                    "description": "Observed funding response. This confirms Stellar funding only; poll SEP-31 for the PI-SPI payout outcome.",
+                    "value": {
+                      "transactionId": "27686fc1-07ad-45a3-80df-d5114a7656ce",
+                      "status": "funding_confirmed",
+                      "stellarTransactionId": "1045b31d8539dc7b95127efa3074c50213d1307c208abc6082689bfcc9d3c68d",
+                      "message": "Testnet funding confirmed. Read the SEP-31 payment until its status is completed.",
+                      "stellarExplorerUrl": "https://stellar.expert/explorer/testnet/tx/1045b31d8539dc7b95127efa3074c50213d1307c208abc6082689bfcc9d3c68d"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Use the approved fixture and exact demo amount",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Invalid request; check the required fields."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing or invalid token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Unauthorized"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Not ready, expired quote, or reconciliation required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Payment is not ready for funding."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Demo limit reached",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Sandbox request limit reached; retry later."
+                    }
+                  }
+                }
+              }
+            },
+            "headers": {
+              "Retry-After": {
+                "description": "When supplied, wait this many seconds before retrying.",
+                "schema": {
+                  "type": "string"
+                },
+                "example": "60"
+              }
+            }
+          },
+          "503": {
+            "description": "Retry the same payment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Sandbox temporarily unavailable; retry the same payment."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
   },
@@ -1644,7 +3003,7 @@
         "type": "http",
         "scheme": "bearer",
         "bearerFormat": "SEP-10 JWT",
-        "description": "Token from POST /auth. This is not a Nostro mobile token. Private keys stay outside Mintlify."
+        "description": "Paste the token returned by Start a sandbox session. Standard integrations use a SEP-10 token."
       }
     },
     "schemas": {
@@ -1662,7 +3021,7 @@
       },
       "Asset": {
         "type": "string",
-        "description": "SEP-38 asset identifier, including the issuer for Stellar credit assets.",
+        "description": "Stellar standard identifier. stellar:USDC:<issuer> identifies USDC issued by that Stellar account; iso4217:XOF identifies CFA francs.",
         "example": "stellar:USDC:GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5"
       },
       "Error": {
@@ -1805,10 +3164,11 @@
         "properties": {
           "id": {
             "type": "string",
-            "description": "Existing customer ID when updating."
+            "description": "Optional existing id for an identical replay. This demo does not permit changing a saved identity or destination."
           },
           "account": {
-            "$ref": "#/components/schemas/StellarAccount"
+            "$ref": "#/components/schemas/StellarAccount",
+            "description": "Sending partner Stellar public key. This is NOT the receiving bank account or mobile-wallet number."
           },
           "memo": {
             "type": "string",
@@ -1837,6 +3197,35 @@
           "last_name": {
             "type": "string",
             "example": "Diop"
+          },
+          "bank_number": {
+            "type": "string",
+            "enum": [
+              "BIMAO_SANDBOX"
+            ],
+            "description": "Bank code. Use BIMAO_SANDBOX. Omit for mobile money."
+          },
+          "bank_account_number": {
+            "type": "string",
+            "enum": [
+              "31432",
+              "41625"
+            ],
+            "description": "PI-SPI virtual bank account: 31432 Amina Diop; 41625 Moussa Ndiaye. No arbitrary accounts or IBANs."
+          },
+          "mobile_money_provider": {
+            "type": "string",
+            "enum": [
+              "PI_SPI_EME_CI_SANDBOX"
+            ],
+            "description": "Mobile-money provider code. Use PI_SPI_EME_CI_SANDBOX."
+          },
+          "mobile_money_number": {
+            "type": "string",
+            "enum": [
+              "+2250700000000"
+            ],
+            "description": "Wallet number. Use +2250700000000 for Lamine Tall."
           }
         },
         "required": [
@@ -1848,7 +3237,96 @@
           "memo_type"
         ],
         "additionalProperties": false,
-        "description": "Demo subset of SEP-12. Provide the sending account, stable customer memo, type and fixture name on creation and update. Optionally include the existing id when updating. Accepted receiver IDs are bound to operator-configured PI-SPI sandbox aliases. The sender fixture is Demo Sender."
+        "description": "Register a sender or one recipient destination. Sender: identity fields only. Receiver: exactly one complete bank or mobile-money field pair. Only the published test fixtures are accepted. Destination and name are immutable; use a new memo for a different recipient. Repeating the same request returns the existing id.",
+        "oneOf": [
+          {
+            "properties": {
+              "type": {
+                "enum": [
+                  "sep31-sender"
+                ]
+              }
+            },
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "bank_number"
+                  ]
+                },
+                {
+                  "required": [
+                    "bank_account_number"
+                  ]
+                },
+                {
+                  "required": [
+                    "mobile_money_provider"
+                  ]
+                },
+                {
+                  "required": [
+                    "mobile_money_number"
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "properties": {
+              "type": {
+                "enum": [
+                  "sep31-receiver"
+                ]
+              }
+            },
+            "required": [
+              "bank_number",
+              "bank_account_number"
+            ],
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "mobile_money_provider"
+                  ]
+                },
+                {
+                  "required": [
+                    "mobile_money_number"
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "properties": {
+              "type": {
+                "enum": [
+                  "sep31-receiver"
+                ]
+              }
+            },
+            "required": [
+              "mobile_money_provider",
+              "mobile_money_number"
+            ],
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "bank_number"
+                  ]
+                },
+                {
+                  "required": [
+                    "bank_account_number"
+                  ]
+                }
+              ]
+            }
+          }
+        ]
       },
       "CustomerCreated": {
         "type": "object",
@@ -1866,7 +3344,7 @@
         "properties": {
           "name": {
             "type": "string",
-            "example": "PI_SPI"
+            "example": "bank_account"
           },
           "description": {
             "type": "string"
@@ -1958,7 +3436,12 @@
             "$ref": "#/components/schemas/Amount"
           },
           "asset": {
-            "$ref": "#/components/schemas/Asset"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Asset"
+              }
+            ],
+            "description": "Currency in which the fee is charged."
           },
           "details": {
             "type": "array",
@@ -1985,22 +3468,43 @@
         "required": [
           "total",
           "asset"
-        ]
+        ],
+        "description": "Service charge for this conversion. Zero in the sandbox. The Stellar network fee is separate and paid by the sandbox sponsor."
       },
       "Price": {
         "type": "object",
         "properties": {
           "price": {
-            "$ref": "#/components/schemas/Amount"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Amount"
+              }
+            ],
+            "description": "Exchange rate before fees: USDC per XOF. 0.002 means 1 USDC buys 500 XOF."
           },
           "total_price": {
-            "$ref": "#/components/schemas/Amount"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Amount"
+              }
+            ],
+            "description": "Exchange rate including fees. Equal to price here because the service fee is zero."
           },
           "sell_amount": {
-            "$ref": "#/components/schemas/Amount"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Amount"
+              }
+            ],
+            "description": "Total USDC amount to send."
           },
           "buy_amount": {
-            "$ref": "#/components/schemas/Amount"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Amount"
+              }
+            ],
+            "description": "XOF amount the receiver receives."
           },
           "fee": {
             "$ref": "#/components/schemas/Fee"
@@ -2027,13 +3531,15 @@
             "type": "string",
             "enum": [
               "stellar:USDC:GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5"
-            ]
+            ],
+            "description": "Currency you send. Keep this USDC identifier, including its issuer."
           },
           "buy_asset": {
             "type": "string",
             "enum": [
               "iso4217:XOF"
-            ]
+            ],
+            "description": "Currency the receiver receives: XOF."
           },
           "sell_amount": {
             "$ref": "#/components/schemas/Amount"
@@ -2044,13 +3550,16 @@
           "buy_delivery_method": {
             "type": "string",
             "enum": [
-              "PI_SPI"
-            ]
+              "bank_account",
+              "mobile_money"
+            ],
+            "description": "Choose the method matching the receiver. PI-SPI is the underlying rail, not a delivery method."
           },
           "country_code": {
             "type": "string",
             "enum": [
-              "SEN"
+              "SEN",
+              "CIV"
             ]
           }
         },
@@ -2083,7 +3592,7 @@
             }
           }
         ],
-        "description": "Provide exactly one of sell_amount and buy_amount. Fixed demo rate only; no real FX conversion. The pinned release has different optional expiry-field handling from newer SEP-38 revisions; this demo does not expose an expiry override."
+        "description": "Provide either sell_amount (USDC to send) or buy_amount (XOF to receive). Choose 100\u20132500 whole XOF, equivalent to 0.2\u20135 USDC. The quote expires after ten minutes."
       },
       "Quote": {
         "type": "object",
@@ -2096,22 +3605,42 @@
             "format": "date-time"
           },
           "price": {
-            "$ref": "#/components/schemas/Amount"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Amount"
+              }
+            ],
+            "description": "Exchange rate before fees: USDC per XOF. 0.002 means 1 USDC buys 500 XOF."
           },
           "total_price": {
-            "$ref": "#/components/schemas/Amount"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Amount"
+              }
+            ],
+            "description": "Exchange rate including fees. Equal to price here because the service fee is zero."
           },
           "sell_asset": {
             "$ref": "#/components/schemas/Asset"
           },
           "sell_amount": {
-            "$ref": "#/components/schemas/Amount"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Amount"
+              }
+            ],
+            "description": "Total USDC amount to send."
           },
           "buy_asset": {
             "$ref": "#/components/schemas/Asset"
           },
           "buy_amount": {
-            "$ref": "#/components/schemas/Amount"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Amount"
+              }
+            ],
+            "description": "XOF amount the receiver receives."
           },
           "fee": {
             "$ref": "#/components/schemas/Fee"
@@ -2178,7 +3707,12 @@
         "type": "object",
         "properties": {
           "amount": {
-            "$ref": "#/components/schemas/Amount"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/Amount"
+              }
+            ],
+            "description": "Copy sell_amount from the quote, without recalculating."
           },
           "asset_code": {
             "type": "string",
@@ -2202,10 +3736,12 @@
             "type": "string"
           },
           "sender_id": {
-            "type": "string"
+            "type": "string",
+            "description": "Customer sending the money. Use the id returned when registering the Sender."
           },
           "receiver_id": {
-            "type": "string"
+            "type": "string",
+            "description": "SEP-12 id of the registered bank or wallet recipient. The payment snapshots this destination before funding."
           },
           "fields": {
             "type": "object",
@@ -2220,10 +3756,6 @@
               "transaction"
             ],
             "additionalProperties": false
-          },
-          "lang": {
-            "type": "string",
-            "example": "en"
           }
         },
         "required": [
@@ -2236,7 +3768,7 @@
           "receiver_id"
         ],
         "additionalProperties": false,
-        "description": "Use an unexpired quote and accepted sender/receiver IDs. The receiver ID selects an existing sandbox alias. Amount is a decimal string in this pinned Anchor Platform implementation. A newer SEP funding_method field is not supported here."
+        "description": "Use an unexpired quote with a matching delivery method and accepted customer IDs. One quote creates at most one demo payment. Repeating the identical request returns the same id; different instructions with that quote return 409."
       },
       "PaymentCreated": {
         "type": "object",
@@ -2312,7 +3844,8 @@
             "type": "string"
           },
           "stellar_account_id": {
-            "$ref": "#/components/schemas/StellarAccount"
+            "$ref": "#/components/schemas/StellarAccount",
+            "description": "Stellar funding destination for this payment. This is separate from the beneficiary\u2019s off-chain bank account or mobile wallet."
           },
           "stellar_memo": {
             "type": "string"
@@ -2385,6 +3918,12 @@
           "required_info_updates": {
             "type": "object",
             "additionalProperties": true
+          },
+          "stellar_explorer_url": {
+            "type": "string",
+            "format": "uri",
+            "nullable": true,
+            "description": "Direct Stellar Testnet explorer link derived from the transaction hash. Null before the blockchain transaction is known. Nostro sandbox convenience field."
           }
         },
         "required": [
