@@ -47,15 +47,8 @@ Choose `mobile_money` in the quote. This test number selects the EME sandbox acc
 
 Choose **100–2,500 XOF**. After funding, the receiving account is credited and the payment becomes `completed`. You can repeat a payment using a fresh quote. Retrying an existing payment does not send it twice.
 
-## Error cases
+## Before sending
 
-| Input | Result |
-| --- | --- |
-| Unknown institution, account or wallet | `400`: unsupported destination |
-| Name does not match the profile | `400`: name mismatch |
-| Bank and wallet fields in one request | `400`: select one destination |
-| Quote method differs from receiver | `400`: delivery method mismatch |
-| More than 2,500 XOF or less than 100 XOF | `400`: amount outside the limits |
-| Quote reused with different instructions | `409`: quote already used |
+Use one destination type per receiver and match its quote method. Unknown institutions, mismatched names and mixed bank/wallet fields are rejected. See the consolidated [error table](/limits-and-errors#errors-and-what-to-do) for statuses and fixes.
 
-The [sandbox overview](/#about-this-sandbox) explains the underlying test accounts.
+[Step 2: register these customers](/quickstart#2-register-the-sender-and-receiver) · [About the underlying test accounts](/about-sandbox)

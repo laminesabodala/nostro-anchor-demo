@@ -31,6 +31,6 @@ An on-chain result and an off-chain result must both be preserved by the integra
 
 ## Retries and uncertain responses
 
-The documented SEP-31 create operation does not advertise an `Idempotency-Key` header. Do not blindly repeat a timed-out `POST /transactions`, create another transfer to compensate, or pay the same transaction twice. Retain the known transaction and quote IDs and ask the operator to reconcile ambiguous creation.
+The demo uses the quote ID to deduplicate payment creation: repeating the same quote and instructions returns the same payment; changing them returns `409`. Retry funding only with the original payment ID, and keep polling it. Do not create a new quote or payment to compensate for an uncertain result. See [Errors & limits](/limits-and-errors) for the complete retry rules.
 
 Nostro must reconcile a PI-SPI timeout against the existing transfer reference before retrying the off-chain leg. A network timeout does not prove the original payment failed.

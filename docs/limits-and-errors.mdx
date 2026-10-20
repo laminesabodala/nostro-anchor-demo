@@ -1,45 +1,58 @@
 ---
-title: "Limits and errors"
-description: "Understand the demo boundary and read protocol-native errors."
+title: "Errors & limits"
+description: "Understand a failed request, retry safely, and stay within the shared sandbox limits."
 ---
 
-The public API follows Stellar SEP response formats. It does not wrap responses in Nostro mobile's `success`, `data` or `error` envelope.
-
-A generic protocol error has this shape:
+The API uses Stellar Ecosystem Proposal (SEP) response formats. It does not use the Nostro mobile API's `success` / `data` wrapper. A typical error is:
 
 ```json
-{
-  "error": "<description of the rejected request>"
-}
+{"error": "Description of the rejected request"}
 ```
 
-Some SEP-31 errors also include a customer `type` or a `fields` object so the sender knows what is missing. Use the HTTP status and structured response together. Error wording may change; do not use message text as a stable machine identifier.
+Read the HTTP status and response together. Some protocol errors include additional fields. Error messages are not stable machine codes.
 
-| HTTP status | What to check |
+## Errors and what to do
+
+| Input or situation | HTTP status | Meaning | Fix |
+| --- | --- | --- | --- |
+| Missing fields, wrong asset, unsupported destination or mismatched name | `400` | Invalid request | Use the exact test profile and the endpoint's example. |
+| Bank and wallet fields together, or quote method differs from receiver | `400` | Inconsistent destination | Select one destination and match its quote method. |
+| Outside 100–2,500 XOF, or fractional XOF | `400` | Invalid amount | Choose an allowed amount; send only one of `sell_amount` and `buy_amount`. |
+| Missing or expired token | `401` | Authentication failed | Start a new session and replace the Bearer token. |
+| Unauthorized sending account or payment binding | `403` | This session cannot perform the operation | Use the account returned by your session and its payment IDs. |
+| Unknown customer, quote, payment or route | `404` | Resource not found | Use an ID from your live response, not a static example. |
+| Expired quote or changed instructions using an already-bound quote | `409` | Quote conflicts with the request | For an unfunded new payment, obtain a new quote. For an existing payment, retain its IDs and reconcile. |
+| Payment creation or funding needs reconciliation | `409` | Outcome is not settled yet | Retry the same request or payment ID; do not create a second payment. |
+| Request body exceeds 64 KiB | `413` | Payload too large | Send only the documented fields. |
+| Unsupported body format | `415` | Content type not accepted | Use `Content-Type: application/json` for JSON requests. Bodyless helper calls need no body. |
+| Shared per-minute request cap | `429` | Too many requests | Wait about a minute, then retry. |
+| Total sponsor budget exhausted | `429` | The shared 50-payment funding budget is used | Contact Nostro; waiting does not replenish this budget. |
+| Provider failure, unavailable funding or shared quote liquidity exhausted | `500` / `503` | Processing cannot complete now | Keep IDs, check payment status, and contact Nostro if persistent. |
+
+There is no documented `509` response. A timeout is not proof that a write failed.
+
+## Shared limits
+
+| Limit | Value |
 | --- | --- |
-| `400` | Invalid or missing fields, inconsistent quote, unsupported asset or unaccepted customer. |
-| `401` / `403` | Missing, invalid or expired authentication; unauthorized sending partner. |
-| `404` | An unknown or inaccessible customer, quote or transaction. |
-| `429` | Rate or attempt limit. Respect `Retry-After` when supplied. |
-| `500` / `503` | Processing or dependency failure. Preserve references and reconcile uncertain writes. |
+| Payment amount | 100–2,500 whole XOF; 0.2–5 test USDC |
+| Exchange rate | 500 XOF per USDC |
+| Service fee | 0; the sponsor pays the separate Stellar network fee |
+| Quote lifetime | Ten minutes; use its `expires_at` |
+| Overall gateway requests | 180 per 60-second window |
+| New sandbox sessions | 10 per 60-second window |
+| Funding requests | 15 per 60-second window |
+| Total sponsored payments | 50 persisted funding records across the shared demo |
 
-The runtime may produce endpoint-specific errors. Only documented success responses should be treated as success.
+Request limits are shared across visitors, not per user. The gateway currently does not return a `Retry-After` header.
 
-## Demo boundaries
+The pinned platform reports `min_amount: 0` in SEP-31 discovery because that field uses whole numbers. The quote service enforces the actual **0.2 USDC / 100 XOF minimum**.
 
-- One configured Stellar Testnet asset, quoted to virtual XOF.
-- Fixed demonstration rate: 500 XOF per USDC, zero fees.
-- Payment range: 0.2–5 USDC; XOF payout precision is whole units.
-- Only operator-approved sending accounts and synthetic beneficiaries.
-- Amina Diop and Moussa Ndiaye are fixtures, not real customer endorsements.
-- PI-SPI funds come from an existing prefunded sandbox business account.
-- Bank wallet reception does not imply a bank holds real USDC or that a production settlement agreement exists.
-- No production payment, live exchange-rate promise, automatic refund guarantee or universal bank availability.
+## Safe retries
 
-The pinned platform currently reports `min_amount: 0` in SEP-31 discovery because that field uses whole numbers. The business quote service enforces the actual **0.2 USDC / 100 XOF minimum**. Use the quote response or rejection as authoritative for permitted amounts.
+- **Create:** retry the identical request with the same quote and customer IDs. It resolves to the same payment; changed instructions conflict.
+- **Fund:** retry the same payment ID. Funding records preserve the signed transaction and reconcile its hash.
+- **Track:** `funding_confirmed` in the funding response proves on-chain funding only. Read payment status until `completed` confirms payout. A `pending_external` payment is still awaiting the off-chain result.
+- **Stop on an error:** retain the payment ID and provider references. Do not automatically create another payment or assume a refund happened.
 
-Treat `expires_at` as authoritative for each quote. Customer approval, available balance and network availability can still prevent execution.
-
-## Data handling
-
-Use synthetic customer information only. Public documentation contains no private keys, provider credentials, operational endpoints or real customer documents. The demonstration's KYC acceptance rules are not production AML or identity approval.
+[Run a payment](/quickstart) · [Test beneficiaries](/test-beneficiaries) · [About this sandbox](/about-sandbox)

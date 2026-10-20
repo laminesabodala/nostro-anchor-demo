@@ -1,0 +1,51 @@
+---
+title: "About this sandbox"
+description: "What runs today, what each system does, and what changes for production."
+---
+
+The sandbox is hosted at **https://sandbox-api.nostro.finance** on OVH. It runs independently of the development computer. This is a shared demonstration environment with [rate and funding limits](/limits-and-errors).
+
+## Architecture and ownership
+
+| Component | Responsibility |
+| --- | --- |
+| Stellar Anchor Platform | Serves the Stellar API standards, stores payment status and observes Testnet funding. |
+| Nostro backend | Checks approved test customers and quotes, verifies funding, initiates PI-SPI payouts and reconciles results. |
+| Stellar Testnet | Records USDC funding with the payment's unique memo. |
+| PI-SPI sandbox | Moves virtual XOF from a prefunded business account to the selected test account. |
+| Receiving institution | Holds the destination bank or mobile-money account. PI-SPI is the rail, not the receiving institution. |
+
+**PI-SPI** is BCEAO's instant-payment infrastructure connecting participating financial institutions. [Official overview](https://developer.pispi.bceao.int/guides/vue-ensemble).
+
+**BIMAO** means Banque des Institutions Mutualistes d’Afrique de l’Ouest. `BIMAO_SANDBOX` is a demo label routed to Banque Sénégal 999. The mobile-money fixture routes to EME Côte d’Ivoire 999. Neither example establishes a production bank or commercial wallet connection.
+
+## Official Anchor Platform
+
+The demo uses **Stellar Anchor Platform 2.11.2**, pinned by container digest. Its source reference is [`a551cea2fb801d52cce2528be7e60f0620e57bfa`](https://github.com/stellar/anchor-platform/commit/a551cea2fb801d52cce2528be7e60f0620e57bfa).
+
+Stellar Ecosystem Proposals (SEPs) define the interfaces:
+
+| Standard | Demonstrated behavior |
+| --- | --- |
+| [SEP-1](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0001.md) | Discover the anchor's URLs and assets. |
+| [SEP-10](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0010.md) | Sign an authentication challenge and obtain a token. |
+| [SEP-12](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0012.md) | Register test customers and read their acceptance status. |
+| [SEP-38](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0038.md) | Get a quote for the payment. |
+| [SEP-31](https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0031.md) | Create and track a cross-border payment instruction. |
+
+## Sandbox boundaries
+
+- Use only the published test profiles. Acceptance does not perform live identity verification or anti-money-laundering screening.
+- The sending account is shared. Do not submit personal information.
+- Test USDC funding and virtual-XOF liquidity are funded separately. The demo proves tracking and reconciliation, not live exchange or atomic settlement between networks.
+- The bank wallet represents a settlement destination for the demonstration. It does not establish that BIMAO holds USDC.
+- The single-server environment can have maintenance interruptions. Testnet resets and provider sandbox outages can also interrupt payments.
+- Automatic refunds, a production review console and unrestricted bank access are outside this demo.
+
+## What changes for production
+
+1. **Partner authentication and funding:** each approved partner signs its own SEP-10 challenges and funds its payment. The `/sandbox/auth` and `/sandbox/payments/{id}/fund` helpers are sandbox conveniences.
+2. **Customer and bank approval:** replace test-profile acceptance with the required identity, compliance and partner-bank controls; enable approved institution integrations and credentials.
+3. **Settlement and operations:** establish live liquidity and settlement arrangements, key management, monitoring, recovery, reconciliation and exception handling before using real funds.
+
+[Run a payment](/quickstart) · [cURL walkthrough](/curl-walkthrough) · [Errors & limits](/limits-and-errors)

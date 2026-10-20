@@ -2,8 +2,8 @@
   "openapi": "3.0.3",
   "info": {
     "title": "Nostro Anchor Sandbox \u2014 Public API",
-    "version": "0.4.2",
-    "description": "Send payments to bank accounts and mobile-money accounts through Stellar Anchor Platform. Use the published test beneficiaries in this sandbox."
+    "version": "0.4.3",
+    "description": "Stellar Testnet funding and PI-SPI sandbox payouts. Start with the six-step walkthrough."
   },
   "servers": [
     {
@@ -45,7 +45,7 @@
           "Discovery"
         ],
         "security": [],
-        "description": "Public SEP-1 discovery document. Use its service URLs and signing key for this environment.",
+        "description": "Discover the anchor\u2019s public URLs and asset settings.",
         "responses": {
           "200": {
             "description": "Stellar discovery TOML.",
@@ -64,6 +64,10 @@
               }
             }
           }
+        },
+        "x-mint": {
+          "href": "/api-reference/discovery/discover-the-anchor",
+          "content": "**Optional reference \u00b7 not required for the six-step demo**\n\nSEP-1 discovery is optional for the guided demo.\n\n[Run a payment](/quickstart) \u00b7 [Errors & limits](/limits-and-errors)"
         }
       }
     },
@@ -74,7 +78,7 @@
         "tags": [
           "Authentication"
         ],
-        "description": "Use the approved sending partner public key. Validate the returned challenge before signing locally.",
+        "description": "Request a Stellar authentication challenge for signing.",
         "responses": {
           "200": {
             "description": "Successful response.",
@@ -273,7 +277,11 @@
               "type": "string"
             }
           }
-        ]
+        ],
+        "x-mint": {
+          "href": "/api-reference/authentication/request-an-authentication-challenge",
+          "content": "**Optional reference \u00b7 not required for the six-step demo**\n\nSEP-10 is Stellar\u2019s authentication standard. A partner signs this challenge with its own wallet. For the browser-only demo, use [Start a sandbox session](/api-reference/sandbox/start-a-sandbox-session).\n\n[Run a payment](/quickstart) \u00b7 [Errors & limits](/limits-and-errors)"
+        }
       },
       "post": {
         "operationId": "verifyChallenge",
@@ -281,7 +289,7 @@
         "tags": [
           "Authentication"
         ],
-        "description": "Sign and validate outside the playground. Never send a private key. Do not submit this challenge as an on-chain payment.",
+        "description": "Exchange a signed Stellar challenge for an authentication token.",
         "responses": {
           "200": {
             "description": "Successful response.",
@@ -443,6 +451,24 @@
                 }
               }
             }
+          },
+          "415": {
+            "description": "Unsupported request content type. Send JSON with Content-Type: application/json.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "error": "Unsupported Media Type"
+                }
+              }
+            }
           }
         },
         "security": [],
@@ -455,6 +481,10 @@
               }
             }
           }
+        },
+        "x-mint": {
+          "href": "/api-reference/authentication/exchange-a-signed-challenge-for-a-token",
+          "content": "**Optional reference \u00b7 not required for the six-step demo**\n\nSEP-10 validates the signature. Save `token` for authenticated requests. The demo helper performs this exchange for the shared sandbox account.\n\n[Run a payment](/quickstart) \u00b7 [Errors & limits](/limits-and-errors)"
         }
       }
     },
@@ -465,7 +495,7 @@
         "tags": [
           "Customers"
         ],
-        "description": "Pass a customer id to check its status. ACCEPTED means the customer can be used in a payment. Without an id, this returns the fields needed for registration.",
+        "description": "Read the requirements and acceptance status of a registered customer.",
         "responses": {
           "200": {
             "description": "Successful response.",
@@ -742,7 +772,11 @@
               "type": "string"
             }
           }
-        ]
+        ],
+        "x-mint": {
+          "href": "/api-reference/customers/read-customer-requirements-or-status",
+          "content": "**Step 2 of 6 \u00b7 Customers**\n\nPass the customer ID as a query parameter: `GET /sep12/customer?id=\u2026`. This SEP-12 test-profile acceptance is not a live identity check.\n\n### What to save\n\n| Response field | Save as | Used in |\n| --- | --- | --- |\n| `id` | `Customer ID` | Step 4 |\n| `status` | `Latest status` | Must be ACCEPTED before payment |\n\n[Previous: step 1](/api-reference/sandbox/start-a-sandbox-session) \u00b7 [Next: step 3](/api-reference/quotes/get-a-payment-quote) \u00b7 [Full walkthrough](/quickstart) \u00b7 [Errors & limits](/limits-and-errors)"
+        }
       },
       "put": {
         "operationId": "putCustomer",
@@ -750,7 +784,7 @@
         "tags": [
           "Customers"
         ],
-        "description": "Register the sender first, then the receiver. The sender is the person sending money; the receiver owns the destination bank account or wallet. Select Sender, BankReceiver or WalletReceiver, and enter the account returned by your session. Save each returned id as sender_id or receiver_id.",
+        "description": "Register a test sender or a bank or mobile-money receiver.",
         "responses": {
           "202": {
             "description": "Successful response.",
@@ -934,6 +968,24 @@
                 }
               }
             }
+          },
+          "415": {
+            "description": "Unsupported request content type. Send JSON with Content-Type: application/json.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "error": "Unsupported Media Type"
+                }
+              }
+            }
           }
         },
         "requestBody": {
@@ -984,6 +1036,10 @@
               }
             }
           }
+        },
+        "x-mint": {
+          "href": "/api-reference/customers/register-a-customer",
+          "content": "**Step 2 of 6 \u00b7 Customers**\n\nStellar\u2019s SEP-12 customer interface is used twice: select Sender, then BankReceiver or WalletReceiver. Both use the session account. Use only the [test beneficiaries](/test-beneficiaries).\n\n### What to save\n\n| Response field | Save as | Used in |\n| --- | --- | --- |\n| `id (sender response)` | `SENDER_ID` | Step 4 |\n| `id (receiver response)` | `RECEIVER_ID` | Step 4 |\n\n[Previous: step 1](/api-reference/sandbox/start-a-sandbox-session) \u00b7 [Next: step 3](/api-reference/quotes/get-a-payment-quote) \u00b7 [Full walkthrough](/quickstart) \u00b7 [Errors & limits](/limits-and-errors)"
         }
       }
     },
@@ -994,7 +1050,7 @@
         "tags": [
           "Quotes"
         ],
-        "description": "Lists the supported currencies and payout methods: bank_account and mobile_money. PI-SPI is the rail used to deliver payments.",
+        "description": "List supported quote assets and delivery methods.",
         "responses": {
           "200": {
             "description": "Successful response.",
@@ -1177,6 +1233,10 @@
               }
             }
           }
+        },
+        "x-mint": {
+          "href": "/api-reference/quotes/list-currencies-and-delivery-methods",
+          "content": "**Optional reference \u00b7 not required for the six-step demo**\n\nSEP-38 defines the quote interface. Select bank_account or mobile_money to match the registered receiver.\n\n[Run a payment](/quickstart) \u00b7 [Errors & limits](/limits-and-errors)"
         }
       }
     },
@@ -1187,7 +1247,7 @@
         "tags": [
           "Quotes"
         ],
-        "description": "Optional: compare indicative exchange rates. To make a payment, use POST /sep38/quote instead.",
+        "description": "Compare indicative prices for supported quote assets.",
         "responses": {
           "200": {
             "description": "Successful response.",
@@ -1400,7 +1460,11 @@
               ]
             }
           }
-        ]
+        ],
+        "x-mint": {
+          "href": "/api-reference/quotes/compare-exchange-rates",
+          "content": "**Optional reference \u00b7 not required for the six-step demo**\n\nSEP-38 indicative prices do not reserve a quote. Use [Get a payment quote](/api-reference/quotes/get-a-payment-quote) for step 3.\n\n[Run a payment](/quickstart) \u00b7 [Errors & limits](/limits-and-errors)"
+        }
       }
     },
     "/sep38/price": {
@@ -1410,7 +1474,7 @@
         "tags": [
           "Quotes"
         ],
-        "description": "Optional: preview what an amount converts to. This does not reserve a rate or create a payment quote.",
+        "description": "Preview an indicative conversion for a chosen amount.",
         "responses": {
           "200": {
             "description": "Successful response.",
@@ -1654,7 +1718,11 @@
               ]
             }
           }
-        ]
+        ],
+        "x-mint": {
+          "href": "/api-reference/quotes/preview-a-conversion",
+          "content": "**Optional reference \u00b7 not required for the six-step demo**\n\nThis SEP-38 preview does not reserve a quote. Use [Get a payment quote](/api-reference/quotes/get-a-payment-quote) for step 3.\n\n[Run a payment](/quickstart) \u00b7 [Errors & limits](/limits-and-errors)"
+        }
       }
     },
     "/sep38/quote": {
@@ -1664,7 +1732,7 @@
         "tags": [
           "Quotes"
         ],
-        "description": "Choose how much to send in sell_amount, or how much the receiver should receive in buy_amount. Supply only one. Payments support 100\u20132500 XOF (0.2\u20135 USDC), in whole XOF. Match buy_delivery_method to the receiver. Save id and sell_amount for payment creation. The rate is 500 XOF per USDC and the service fee is zero.",
+        "description": "Reserve the USDC and XOF amounts for one payment.",
         "responses": {
           "201": {
             "description": "Successful response.",
@@ -1837,6 +1905,24 @@
                 }
               }
             }
+          },
+          "415": {
+            "description": "Unsupported request content type. Send JSON with Content-Type: application/json.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "error": "Unsupported Media Type"
+                }
+              }
+            }
           }
         },
         "requestBody": {
@@ -1870,6 +1956,10 @@
               }
             }
           }
+        },
+        "x-mint": {
+          "href": "/api-reference/quotes/get-a-payment-quote",
+          "content": "**Step 3 of 6 \u00b7 Quotes**\n\nStellar\u2019s SEP-38 quote interface uses `bank_account` or `mobile_money` to match the receiver. Send only one of `sell_amount` and `buy_amount`. [Price, fee and asset explained](/quickstart#what-the-quote-fields-mean).\n\n### What to save\n\n| Response field | Save as | Used in |\n| --- | --- | --- |\n| `id` | `QUOTE_ID` | Step 4 |\n| `sell_amount` | `SELL_AMOUNT` | Step 4 amount |\n| `expires_at` | `Quote deadline` | Create and fund before expiry |\n\n[Previous: step 2](/api-reference/customers/register-a-customer) \u00b7 [Next: step 4](/api-reference/payments/create-a-payment) \u00b7 [Full walkthrough](/quickstart) \u00b7 [Errors & limits](/limits-and-errors)"
         }
       }
     },
@@ -1880,7 +1970,7 @@
         "tags": [
           "Quotes"
         ],
-        "description": "Use the quote ID returned by POST /sep38/quote.",
+        "description": "Read an existing quote and its expiry time.",
         "responses": {
           "200": {
             "description": "Successful response.",
@@ -2064,7 +2154,11 @@
               "type": "string"
             }
           }
-        ]
+        ],
+        "x-mint": {
+          "href": "/api-reference/quotes/read-a-quote",
+          "content": "**Step 3 of 6 \u00b7 Quotes**\n\nThis reads a saved SEP-38 quote. It does not create or extend a quote.\n\n### What to save\n\n| Response field | Save as | Used in |\n| --- | --- | --- |\n| `id, sell_amount` | `QUOTE_ID, SELL_AMOUNT` | Step 4 |\n| `expires_at` | `Quote deadline` | Check validity |\n\n[Previous: step 2](/api-reference/customers/register-a-customer) \u00b7 [Next: step 4](/api-reference/payments/create-a-payment) \u00b7 [Full walkthrough](/quickstart) \u00b7 [Errors & limits](/limits-and-errors)"
+        }
       }
     },
     "/sep31/info": {
@@ -2074,7 +2168,7 @@
         "tags": [
           "Payments"
         ],
-        "description": "Lists the supported payment currency and customer requirements. Use a registered receiver from the available test beneficiaries.",
+        "description": "Read the supported payout asset and customer requirements.",
         "responses": {
           "200": {
             "description": "Successful response.",
@@ -2267,7 +2361,11 @@
             }
           }
         },
-        "security": []
+        "security": [],
+        "x-mint": {
+          "href": "/api-reference/payments/read-payout-requirements",
+          "content": "**Optional reference \u00b7 not required for the six-step demo**\n\nSEP-31 defines the cross-border payment interface. The quote service enforces the actual 100-XOF minimum; the pinned discovery schema reports min_amount as 0.\n\n[Run a payment](/quickstart) \u00b7 [Errors & limits](/limits-and-errors)"
+        }
       }
     },
     "/sep31/transactions": {
@@ -2277,7 +2375,7 @@
         "tags": [
           "Payments"
         ],
-        "description": "Use sender_id and receiver_id from customer registration, and quote_id from your quote. Copy the quote sell_amount into amount. Creation returns a payment id and funding details; it does not send funds. Repeating the same request returns the same payment. Use a new quote for a new payment.",
+        "description": "Create a payment instruction without moving funds.",
         "responses": {
           "201": {
             "description": "Successful response.",
@@ -2464,6 +2562,24 @@
                 }
               }
             }
+          },
+          "415": {
+            "description": "Unsupported request content type. Send JSON with Content-Type: application/json.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "error": "Unsupported Media Type"
+                }
+              }
+            }
           }
         },
         "requestBody": {
@@ -2487,6 +2603,10 @@
               }
             }
           }
+        },
+        "x-mint": {
+          "href": "/api-reference/payments/create-a-payment",
+          "content": "**Step 4 of 6 \u00b7 Payments**\n\nStellar\u2019s SEP-31 payment interface connects the sender, receiver and quote. Set amount to the quote\u2019s sell_amount. An identical retry returns the same payment; changed instructions with the same quote conflict.\n\n### What to save\n\n| Response field | Save as | Used in |\n| --- | --- | --- |\n| `id` | `PAYMENT_ID` | Steps 5 and 6 |\n\n[Previous: step 3](/api-reference/quotes/get-a-payment-quote) \u00b7 [Next: step 5](/api-reference/sandbox/fund-a-sandbox-payment) \u00b7 [Full walkthrough](/quickstart) \u00b7 [Errors & limits](/limits-and-errors)"
         }
       }
     },
@@ -2497,7 +2617,7 @@
         "tags": [
           "Payments"
         ],
-        "description": "Read this after funding. completed means the receiving account has been credited. pending_external means payout confirmation is still pending. external_transaction_id is the PI-SPI payout reference. Open transaction.stellar_explorer_url to view this payment\u2019s funding transaction on Stellar Testnet; it is null until a transaction hash is available.",
+        "description": "Read payment status and the on-chain and off-chain references.",
         "responses": {
           "200": {
             "description": "Successful response.",
@@ -2723,7 +2843,11 @@
               "type": "string"
             }
           }
-        ]
+        ],
+        "x-mint": {
+          "href": "/api-reference/payments/read-payment-status",
+          "content": "**Step 6 of 6 \u00b7 Tracking**\n\nCheck every few seconds. `completed` means PI-SPI, the regional instant-payment rail, confirmed credit to the test account. `pending_external` means payout confirmation is pending. Stop and investigate `error`.\n\n### What to save\n\n| Response field | Save as | Used in |\n| --- | --- | --- |\n| `transaction.id` | `Payment reference` | Tracking |\n| `transaction.stellar_explorer_url` | `Funding explorer link` | View Stellar Testnet |\n| `transaction.external_transaction_id` | `PI-SPI payout reference` | Identify off-chain payout |\n| `transaction.status` | `Latest status` | completed confirms payout |\n\n[Previous: step 5](/api-reference/sandbox/fund-a-sandbox-payment) \u00b7 [Full walkthrough](/quickstart) \u00b7 [Errors & limits](/limits-and-errors)"
+        }
       }
     },
     "/sandbox/auth": {
@@ -2734,7 +2858,7 @@
           "Sandbox"
         ],
         "security": [],
-        "description": "Start here. No body is needed. Returns a Bearer token and the sending partner Stellar account. Save both; next register the sender and receiver.",
+        "description": "Get a token and the shared sending-partner account.",
         "responses": {
           "200": {
             "description": "Real Anchor token for the demo sender",
@@ -2822,6 +2946,10 @@
               }
             }
           }
+        },
+        "x-mint": {
+          "href": "/api-reference/sandbox/start-a-sandbox-session",
+          "content": "**Step 1 of 6 \u00b7 Session**\n\nSend without a body. Paste only the token into the Bearer field on later calls.\n\n### What to save\n\n| Response field | Save as | Used in |\n| --- | --- | --- |\n| `token` | `TOKEN` | Steps 2\u20136 |\n| `account` | `ACCOUNT` | Step 2 |\n\n[Next: step 2](/api-reference/customers/register-a-customer) \u00b7 [Full walkthrough](/quickstart) \u00b7 [Errors & limits](/limits-and-errors)"
         }
       }
     },
@@ -2832,7 +2960,7 @@
         "tags": [
           "Sandbox"
         ],
-        "description": "Enter the payment ID and Bearer token, then send with no body. The sponsor funds the amount from your quote on Stellar Testnet. Open stellarExplorerUrl from the response to see the transaction on the blockchain. Read payment status to confirm the PI-SPI payout. Retrying the same payment does not send funds twice.",
+        "description": "Sponsor the quoted USDC transfer on Stellar Testnet.",
         "parameters": [
           {
             "name": "id",
@@ -2992,7 +3120,49 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "Caller is not authorized.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Forbidden"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource is not available to this caller.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "examples": {
+                  "Sandbox": {
+                    "summary": "Example error",
+                    "description": "Illustrative error body. Exact error text may vary; branch on HTTP status and protocol fields, not the wording.",
+                    "value": {
+                      "error": "Not found"
+                    }
+                  }
+                }
+              }
+            }
           }
+        },
+        "x-mint": {
+          "href": "/api-reference/sandbox/fund-a-sandbox-payment",
+          "content": "**Step 5 of 6 \u00b7 Funding**\n\nUse the payment ID from step 4. No body is needed. If the result is pending or uncertain, retry the same ID. A funding confirmation does not confirm the off-chain payout.\n\n### What to save\n\n| Response field | Save as | Used in |\n| --- | --- | --- |\n| `transactionId` | `PAYMENT_ID` | Step 6 |\n| `stellarExplorerUrl` | `Funding explorer link` | View on-chain funding |\n\n[Previous: step 4](/api-reference/payments/create-a-payment) \u00b7 [Next: step 6](/api-reference/payments/read-payment-status) \u00b7 [Full walkthrough](/quickstart) \u00b7 [Errors & limits](/limits-and-errors)"
         }
       }
     }
@@ -3944,9 +4114,5 @@
         ]
       }
     }
-  },
-  "externalDocs": {
-    "description": "Official Anchor Platform source pinned for this demo",
-    "url": "https://github.com/stellar/anchor-platform/tree/a551cea2fb801d52cce2528be7e60f0620e57bfa"
   }
 }

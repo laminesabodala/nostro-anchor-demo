@@ -1,22 +1,59 @@
 ---
-title: "Nostro Anchor API"
-description: "Send payments to bank accounts and mobile-money accounts."
+title: "Stellar payouts to bank accounts and mobile money"
+sidebarTitle: "Home"
+description: "Explore how Nostro connects Stellar funding to local-currency payouts."
 ---
 
-Nostro connects payment businesses to receiving accounts through Stellar Anchor Platform and PI-SPI. Authenticate, register the sender and receiver, get a quote, create a payment, then fund and track it.
+Nostro is building an anchor that connects Stellar-based payment partners to bank accounts and mobile-money wallets in West Africa. **This working sandbox** connects USDC funding on Stellar Testnet to XOF payments into PI-SPI test accounts. You can complete the flow from this site.
 
-<Card title="Run a payment" icon="play" href="/quickstart">
-  Complete a payment in the API playground. Choose an amount between 100 and 2,500 XOF.
-</Card>
+## What is this demo?
 
-<Card title="Test beneficiaries" icon="users" href="/test-beneficiaries">
-  Copy the bank-account or mobile-money details to use in the sandbox.
-</Card>
+- **Official Stellar Anchor Platform:** authentication, customer registration, quotes and payment tracking through Stellar Ecosystem Proposals (SEPs). We use version **2.11.2**, a pinned container image and [source reference `a551cea`](https://github.com/stellar/anchor-platform/commit/a551cea2fb801d52cce2528be7e60f0620e57bfa).
+- **Stellar Testnet:** the public test network records funding in Circle test USDC. No real money is involved.
+- **PI-SPI:** the instant-payment infrastructure operated by BCEAO, the Central Bank of West African States. It connects participating banks and mobile-money issuers. This demo calls its **sandbox API** to credit test accounts. [PI-SPI overview](https://developer.pispi.bceao.int/guides/vue-ensemble).
+- **BIMAO:** Banque des Institutions Mutualistes d’Afrique de l’Ouest. Our `BIMAO_SANDBOX` example routes to PI-SPI’s Banque Sénégal 999 test institution. The wallet example routes to EME Côte d’Ivoire 999. [About BIMAO](https://www.bimao.sn/mentions-legales/).
+
+## Try a payment
+
+Allow about ten minutes for your first walkthrough. You need no wallet, installation or API key.
+
+<CardGroup cols={3}>
+  <Card title="Run a payment" icon="play" href="/quickstart">Follow six steps in the API playground.</Card>
+  <Card title="Test beneficiaries" icon="users" href="/test-beneficiaries">Choose a bank account or mobile-money wallet.</Card>
+  <Card title="Errors & limits" icon="circle-info" href="/limits-and-errors">Check amounts, retries and error responses.</Card>
+</CardGroup>
+
+## How it works
+
+**1. Session → 2. Customers → 3. Quote → 4. Payment → 5. Funding → 6. Tracking**
+
+The Anchor Platform handles the Stellar API protocols. Nostro connects customer and quote data to a payment, checks its on-chain funding, initiates the PI-SPI payout, and reports the result back to the Anchor Platform.
+
+```mermaid
+flowchart TD
+  A["Partner / API playground"] --> B["Stellar Anchor Platform"]
+  B <--> C["Nostro backend"]
+  S["Stellar Testnet funding"] --> C
+  C --> P["PI-SPI sandbox"]
+  P --> D["Bank account or mobile-money account"]
+```
+
+## What this demonstrates
+
+- SEP-10 authentication, including a sandbox helper that signs for the shared demo account.
+- SEP-12 registration and status for predefined sender and receiver profiles.
+- SEP-38 quotes and the SEP-31 payment lifecycle.
+- On-chain funding with a clickable Stellar Testnet explorer link.
+- Off-chain payout confirmation with a PI-SPI reference in `external_transaction_id`.
 
 ## About this sandbox
 
-This environment uses Stellar Testnet and PI-SPI virtual accounts. No real money moves. The BIMAO-labelled bank example routes to Banque Sénégal 999, and the mobile-money example routes to EME Côte d'Ivoire 999. The wallet number is a fixed test lookup for that account. These examples do not establish a production BIMAO or commercial wallet connection.
+Hosted at **https://sandbox-api.nostro.finance**. The demo account is shared and rate limits apply. The fixed test rate is **500 XOF per USDC**, with zero service fees.
 
-The sandbox exchange rate is 500 XOF per USDC with zero service fees. The PI-SPI account is funded separately; this demonstrates tracking funding and payout, not live currency conversion. Use only the provided test customers; the sandbox account is shared.
+**What this is not**
 
-The API is hosted at `https://sandbox-api.nostro.finance` and runs independently of the development computer.
+- A production BIMAO or commercial mobile-wallet connection.
+- Live customer identity verification: the demo accepts predefined test profiles.
+- Live currency conversion: the PI-SPI payout account is funded separately from the Testnet wallet.
+
+See [About this sandbox](/about-sandbox) for architecture, boundaries and the production roadmap.

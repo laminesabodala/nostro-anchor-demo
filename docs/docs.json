@@ -34,13 +34,7 @@
   "contextual": {
     "options": [
       "copy",
-      "view",
-      "chatgpt",
-      "claude",
-      "perplexity",
-      "mcp",
-      "cursor",
-      "vscode"
+      "view"
     ],
     "display": "header"
   },
@@ -55,7 +49,10 @@
             "pages": [
               "index",
               "quickstart",
-              "test-beneficiaries"
+              "test-beneficiaries",
+              "limits-and-errors",
+              "about-sandbox",
+              "curl-walkthrough"
             ]
           }
         ]
@@ -65,53 +62,53 @@
         "openapi": "/openapi.json",
         "groups": [
           {
-            "group": "1. Start demo",
+            "group": "1. Session",
             "pages": [
               "POST /sandbox/auth"
             ]
           },
           {
-            "group": "2. Register customers",
+            "group": "2. Customers",
             "pages": [
               "PUT /sep12/customer",
               "GET /sep12/customer"
             ]
           },
           {
-            "group": "3. Get a quote",
+            "group": "3. Quotes",
             "pages": [
-              "POST /sep38/quote"
+              "POST /sep38/quote",
+              "GET /sep38/quote/{quote_id}"
             ]
           },
           {
-            "group": "4. Create payment",
+            "group": "4. Payments",
             "pages": [
               "POST /sep31/transactions"
             ]
           },
           {
-            "group": "5. Fund and track",
+            "group": "5. Funding",
             "pages": [
-              "POST /sandbox/payments/{id}/fund",
+              "POST /sandbox/payments/{id}/fund"
+            ]
+          },
+          {
+            "group": "6. Tracking",
+            "pages": [
               "GET /sep31/transactions/{id}"
             ]
           },
           {
-            "group": "Standard authentication",
-            "pages": [
-              "GET /auth",
-              "POST /auth"
-            ]
-          },
-          {
-            "group": "Additional endpoints",
+            "group": "Optional reference",
             "pages": [
               "GET /.well-known/stellar.toml",
+              "GET /auth",
+              "POST /auth",
               "GET /sep31/info",
               "GET /sep38/info",
               "GET /sep38/prices",
-              "GET /sep38/price",
-              "GET /sep38/quote/{quote_id}"
+              "GET /sep38/price"
             ]
           }
         ]

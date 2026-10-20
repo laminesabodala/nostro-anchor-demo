@@ -3,28 +3,34 @@ title: "Run a payment"
 description: "Choose a receiver, choose an amount, and follow the payment to completion."
 ---
 
-This walkthrough uses Stellar Testnet and PI-SPI sandbox. Use the [test beneficiaries](/test-beneficiaries). No real money is involved.
+## What you need
+
+Just this site's API playground and a [test beneficiary](/test-beneficiaries). No wallet, terminal, installation or local helper is needed. The API runs at `https://sandbox-api.nostro.finance`.
+
+This walkthrough uses Stellar Testnet and PI-SPI, the regional instant-payment network's sandbox. All funds are test funds.
 
 <Tip>
-  Everything runs in this site's **Try it** playground. No wallet, terminal, installation or local helper is needed. The API is hosted at `https://sandbox-api.nostro.finance`.
-
-  Choose request examples from the dropdown beside **cURL** (for example, **Sender** or **BankQuote**). This fills the request fields. Replace any `<...>` placeholders with values from your own responses.
-
-  After **Send**, wait for the live response panel at the top right to show a status such as **200 OK**, **201 Created** or **202 Accepted**. Copy IDs and tokens from that panel. The response examples below it are illustrations, not the result of your request. Save the sender ID before submitting the receiver on the same page.
-
-  Paste only the token into the Bearer field, without adding the word `Bearer`. Mintlify may keep it between pages; replace it if you start a new session.
+- Choose a request example from the dropdown beside **cURL**, such as **Sender** or **BankQuote**.
+- Click **Send** and wait for the live response panel to show its HTTP status.
+- Copy values from that live response, not the static examples underneath it.
 </Tip>
 
 ## 1. Start a session
 
 Open [Start a sandbox session](/api-reference/sandbox/start-a-sandbox-session?playground=open) and click **Send**. No body is needed.
 
-Save these two values:
+Paste only `token` into the **Bearer** field on subsequent pages—do not add the word `Bearer`. Replace it if you start another session.
 
-- **token**: paste it into the Bearer field on the following pages.
-- **account**: the sending partner's Stellar public key. Use it when registering both customers.
+| Saved so far | Save as | Used in |
+| --- | --- | --- |
+| `token` | `TOKEN` | Authentication in steps 2–6 |
+| `account` | `ACCOUNT` | Both registrations in step 2 |
+
+The `account` is the partner's Stellar public key, not a beneficiary's bank-account number.
 
 ## 2. Register the sender and receiver
+
+Identify the person sending money and the account receiving it. **Call twice: `PUT /sep12/customer`.**
 
 Open [Register a customer](/api-reference/customers/register-a-customer?playground=open). First select **Sender**, paste your session `account`, and send. Save its `id` as **sender_id**.
 
@@ -41,7 +47,17 @@ The **sender** is the person sending money. The **receiver** owns the destinatio
 
 You can [read customer status](/api-reference/customers/read-customer-requirements-or-status?playground=open) with each returned ID. Both must be `ACCEPTED`.
 
+| Saved so far | Save as | Used in |
+| --- | --- | --- |
+| Session token and account | `TOKEN`, `ACCOUNT` | Authentication and registration |
+| Sender response `id` | `SENDER_ID` | Step 4 |
+| Receiver response `id` | `RECEIVER_ID` | Step 4 |
+
+Customer status uses `GET /sep12/customer?id=…`. Acceptance here is for test profiles, not live identity verification.
+
 ## 3. Choose an amount and get a quote
+
+Reserve the amounts and delivery method. **Call: `POST /sep38/quote`.**
 
 Open [Get a payment quote](/api-reference/quotes/get-a-payment-quote?playground=open). Select **BankQuote** or **WalletQuote** to match your receiver.
 
@@ -56,7 +72,14 @@ Change **sell_amount** to the USDC amount you want to send. For example:
 
 The minimum is **100 XOF**, the maximum is **2,500 XOF**, and the receiver must get whole XOF. You can instead provide `buy_amount` in XOF; remove `sell_amount` first. Never provide both.
 
-Save the quote **id** and **sell_amount**. The quote is valid for ten minutes.
+The quote is valid for ten minutes.
+
+| Saved so far | Save as | Used in |
+| --- | --- | --- |
+| Session values | `TOKEN`, `ACCOUNT` | Authentication and registration |
+| Customer IDs | `SENDER_ID`, `RECEIVER_ID` | Step 4 |
+| Quote response `id` | `QUOTE_ID` | Step 4 |
+| Quote response `sell_amount` | `SELL_AMOUNT` | Step 4 `amount` |
 
 ### What the quote fields mean
 
@@ -81,6 +104,8 @@ XOF uses the currency-code format `iso4217:XOF`. These are [standard Stellar quo
 
 ## 4. Create the payment
 
+Connect the customers to the quote. **Call: `POST /sep31/transactions`.**
+
 Open [Create a payment](/api-reference/payments/create-a-payment?playground=open).
 
 - Set `sender_id` from sender registration.
@@ -90,17 +115,40 @@ Open [Create a payment](/api-reference/payments/create-a-payment?playground=open
 
 Send and save the payment **id**. This creates the instruction; funds have not moved yet. Repeating the identical request returns the same payment.
 
+| Saved so far | Save as | Used in |
+| --- | --- | --- |
+| Session values | `TOKEN`, `ACCOUNT` | Authentication and registration |
+| Customer IDs | `SENDER_ID`, `RECEIVER_ID` | Payment instruction |
+| Quote values | `QUOTE_ID`, `SELL_AMOUNT` | Payment instruction |
+| Payment response `id` | `PAYMENT_ID` | Steps 5 and 6 |
+
 ## 5. Fund the payment
+
+Ask the sponsor to transfer the quoted test USDC. **Call: `POST /sandbox/payments/{id}/fund`.**
 
 Open [Fund a sandbox payment](/api-reference/sandbox/fund-a-sandbox-payment?playground=open), enter the payment ID and token, and click **Send**. No body is needed.
 
 The sponsor sends the USDC amount agreed in the quote. The response includes its Stellar transaction reference. If the call times out, retry the **same payment ID**; retries do not send twice.
 
+| What to keep | Save as | Used in |
+| --- | --- | --- |
+| All values from step 4 | Unchanged | Tracking and safe retries |
+| `stellarExplorerUrl` | Funding explorer link | View the on-chain transfer |
+
 ## 6. Check the result
 
-Open [Read payment status](/api-reference/payments/read-payment-status?playground=open) with the payment ID. Repeat until `status` is **completed**.
+Confirm that funding led to a payout. **Call: `GET /sep31/transactions/{id}`.**
+
+Open [Read payment status](/api-reference/payments/read-payment-status?playground=open) with the payment ID. Check again every few seconds until `transaction.status` is **completed**. If it is `error`, stop and use [Errors & limits](/limits-and-errors).
 
 `completed` means PI-SPI confirmed the receiving account was credited. `external_transaction_id` is the payout reference. A Stellar transaction reference alone confirms funding, not delivery to the receiver.
+
+| What to save | Save as | What it proves |
+| --- | --- | --- |
+| `transaction.id` | Payment reference | The same instruction across the flow |
+| `transaction.stellar_explorer_url` | Funding explorer link | USDC funding on Testnet |
+| `transaction.external_transaction_id` | PI-SPI payout reference | Identifies the off-chain payout |
+| `transaction.status` | Latest payment status | `completed` means the test account was credited |
 
 ### View your transaction on Stellar Testnet
 
@@ -114,12 +162,8 @@ The link is `null` until a blockchain transaction hash is available. The explore
 
 You do not need the discovery or preview calls for this walkthrough. They help an integrating application list currencies, compare rates or preview a conversion. **Get a payment quote** is the call that reserves the conversion used by a payment.
 
-## Troubleshooting
+## Where to go next
 
-- **401**: start a new session and replace your Bearer token.
-- **400**: check the receiver details, amount and delivery method.
-- **409**: follow the error message. If the quote expired, obtain a new one. If payment creation is still being reconciled, retry the same request.
-- **429**: the shared sandbox limit was reached. Retry later or contact Nostro.
-- **Connection error**: retry shortly; if the hosted sandbox remains unavailable, contact Nostro.
-
-The shared sponsor supports up to **50 funded payments**. Use IDs from your own responses rather than copying historical response examples.
+- [Run the same six steps with cURL](/curl-walkthrough).
+- [Errors & limits](/limits-and-errors): retry instructions, amounts and shared limits.
+- [About this sandbox](/about-sandbox): what is implemented and what changes for production.
