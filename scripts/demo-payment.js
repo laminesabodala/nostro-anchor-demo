@@ -19,8 +19,11 @@ async function main() {
   )
     throw Error("Testnet configuration mismatch");
   const authOnly = process.argv[2] === "--auth-only";
-  const runName = authOnly ? "playground-auth" : process.argv[2] || "first-payment";
-  if (!/^[a-z0-9-]{1,40}$/.test(runName)) throw Error("Use a simple run name");
+  const fundExisting = process.argv[2] === "--fund" ? process.argv[3] : null;
+  if (process.argv[2] === "--fund" && !/^[a-f0-9-]{36}$/.test(fundExisting || ""))
+    throw Error("Supply the existing SEP-31 transaction UUID after --fund");
+  const runName = authOnly ? "playground-auth" : fundExisting ? "fund-" + fundExisting : process.argv[2] || "first-payment";
+  if (!/^[a-z0-9-]{1,64}$/.test(runName)) throw Error("Use a simple run name");
   const filename = path.join(root, ".local", runName + ".json");
   await fs.mkdir(path.dirname(filename), { recursive: true, mode: 0o700 });
   const lock = filename + ".lock";
@@ -98,7 +101,14 @@ async function main() {
     console.log("Playground bearer token saved privately to .local/sep10-token.txt; no payment created.");
     return;
   }
-  if (!state.senderId) {
+  if (fundExisting && !state.transaction) {
+    const existing = (await call("/sep31/transactions/" + fundExisting)).transaction;
+    if (existing.id !== fundExisting) throw Error("Transaction identifier mismatch");
+    state.transaction = { id: existing.id };
+    state.quote = await call("/sep38/quote/" + existing.quote_id);
+    await save();
+  }
+  if (!fundExisting && !state.senderId) {
     state.senderId = (
       await call("/sep12/customer", "PUT", {
         account: wallet.publicKey,
@@ -111,7 +121,7 @@ async function main() {
     ).id;
     await save();
   }
-  if (!state.receiverId) {
+  if (!fundExisting && !state.receiverId) {
     state.receiverId = (
       await call("/sep12/customer", "PUT", {
         account: wallet.publicKey,
@@ -155,7 +165,7 @@ async function main() {
     await save();
   }
   const id = state.transaction.id;
-  console.log("SEP-31 payment created: " + id);
+  console.log("SEP-31 payment: " + id);
   const tx = (await call("/sep31/transactions/" + id)).transaction;
   if (
     tx.stellar_account_id !== config.bankPublicKey ||
@@ -169,6 +179,18 @@ async function main() {
     tx.amount_out_asset !== "iso4217:XOF"
   )
     throw Error("Funding amount or asset mismatch");
+  if (tx.status === "completed") {
+    console.log(JSON.stringify({
+      transactionId: id,
+      status: tx.status,
+      stellarHash: tx.stellar_transaction_id,
+      externalTransactionId: tx.external_transaction_id,
+      amountUSDC: tx.amount_in,
+      amountXOF: tx.amount_out,
+      message: "Already completed; no payment submitted."
+    }, null, 2));
+    return;
+  }
   const horizon = new S.Horizon.Server("https://horizon-testnet.stellar.org");
   if (!state.fundingXdr) {
     if (tx.status !== "pending_sender")

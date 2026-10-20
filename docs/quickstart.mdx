@@ -7,7 +7,7 @@ description: "Use a test sender, an approved fixture recipient and a small virtu
 
 Obtain the current demo HTTPS origin and authorized sandbox fixtures from the operator. The synthetic recipients are **Amina Diop** and **Moussa Ndiaye**. The operator binds each accepted receiver customer ID to its existing PI-SPI sandbox alias. This fixture mapping is a demo rule, not general identity matching by name.
 
-You need a pre-authorized sending Stellar account and Testnet USDC on that account. Mintlify can make API calls; it does not safely hold private keys or sign Stellar transactions. The local operator helper runs the full demonstration; the manual API walkthrough below is an alternative.
+You need a pre-authorized sending Stellar account and Testnet USDC on that account. Mintlify can make API calls; it does not safely hold private keys or sign Stellar transactions. Use the [playground demonstration](/live-demo) to create a payment here and fund that exact payment with the local signing helper. The whole-flow helper below is another option.
 
 The asset is identified by its **code and issuer**, on **Testnet**:
 
@@ -39,7 +39,7 @@ A completed run prints its observed receipt. An incomplete run must remain pendi
 
 ## Manual API walkthrough
 
-The steps below describe the public calls for an independently implemented sender. They are an alternative to running the whole-flow helper. Do not create a payment manually and then invoke the helper expecting it to fund that existing transaction.
+The steps below describe the public calls for an independently implemented sender. They are an alternative to running the whole-flow helper. To fund an existing playground payment, use `node scripts/demo-payment.js --fund <transaction-id>` as described in the [playground demonstration](/live-demo). Running the helper with a new run name instead creates a new payment.
 
 ### 1. Discover and authenticate
 

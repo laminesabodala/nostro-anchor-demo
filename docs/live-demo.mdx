@@ -1,0 +1,88 @@
+---
+title: "Run a payment from the playground"
+description: "Create a real sandbox payment here, fund it with Testnet USDC, then watch PI-SPI complete the payout."
+---
+
+<Info>
+This demonstration sends **0.2 Testnet USDC** and credits **100 virtual XOF** to a synthetic beneficiary. No real money moves. Keep the local demo services and HTTPS tunnel running during the presentation.
+</Info>
+
+## 1. Prepare your presenter session
+
+From the configured `anchor-demo` directory on the operator's Mac:
+
+```sh
+node scripts/demo-payment.js --auth-only
+```
+
+The helper signs and verifies the SEP-10 challenge and saves a short-lived token in `.local/sep10-token.txt`. Copy that token into the API playground's **Bearer** authorization field. Do not paste a wallet private key. The playground calls the sandbox directly from your browser.
+
+Your approved sender public account is:
+
+```text
+GCZN3RM3P3M3NZH5OS6DHVXZIOGMTW4CIORHBVMRLSA3JASUHKSE4DKI
+```
+
+## 2. Register the two customers
+
+In **API reference**, open `PUT /sep12/customer`.
+
+- Send the **Sender** example for Demo Sender. Copy the returned `id`.
+- Send the **Receiver** example for Amina Diop. Copy that returned `id`.
+
+The examples already contain the sandbox public account, string memo and `memo_type: text`. Reusing the same fixture references returns their existing customer IDs. These are synthetic identities, not production KYC approvals.
+
+## 3. Obtain a quote
+
+Open `POST /sep38/quote` and send the prefilled example:
+
+```json
+{
+  "context": "sep31",
+  "sell_asset": "stellar:USDC:GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5",
+  "buy_asset": "iso4217:XOF",
+  "sell_amount": "0.2",
+  "buy_delivery_method": "PI_SPI"
+}
+```
+
+Copy the quote `id`. Check the returned amounts and `expires_at`; fund within the quote's validity. The demo uses a fixed illustrative rate of 500 XOF per USDC and zero fees.
+
+## 4. Create the payout
+
+Open `POST /sep31/transactions`. In the prefilled body, replace `quote_id`, `sender_id` and `receiver_id` with the values from your responses, then send it **once**. Leave the amount at `0.2`.
+
+Copy the new transaction `id`. The response includes the bank demo wallet and a unique memo. View `GET /sep31/transactions/{id}`: the initial status should be `pending_sender`.
+
+## 5. Fund that exact payment
+
+Mintlify sends API requests; a wallet must sign the Stellar transfer. For this operator-run demonstration, execute:
+
+```sh
+node scripts/demo-payment.js --fund <transaction-id-from-step-4>
+```
+
+This helper funds **the existing payment created in the playground**. It does not create another quote or payout. It checks the destination, issuer, amount and expiry, signs locally, and sends exactly 0.2 Testnet USDC. Private keys stay on the operator's machine.
+
+Rerunning the same command resumes its saved transaction rather than submitting a new payment. A completed transaction returns its receipt without sending anything. If the helper reports an uncertain outcome, preserve its state and reconcile it; do not create a new payout as a retry.
+
+## 6. Show the result in the playground
+
+Send `GET /sep31/transactions/{id}` again. The observed flow is:
+
+```text
+pending_sender → pending_receiver → completed
+```
+
+`pending_receiver` means Stellar funding has been observed while the payout is being processed. `completed` is returned only after PI-SPI confirms the off-chain result. Show:
+
+- `stellar_transaction_id`: inspect this on [Stellar Expert Testnet](https://stellar.expert/explorer/testnet).
+- `amount_in` and `amount_out`: 0.2 Testnet USDC and 100 virtual XOF.
+- `external_transaction_id`: the PI-SPI payout reference.
+- `completed_at`: the confirmed completion time.
+
+The local signer prints the same references. Previous actual runs are recorded under [Verified demonstration](/verified-demo); use the newly returned result for your live presentation.
+
+<Note>
+The USDC receipt and XOF payout are separate transfers. The virtual XOF is supplied from a prefunded PI-SPI sandbox account. This demonstrates the integration and reconciliation flow, not real FX conversion or atomic settlement.
+</Note>

@@ -59,7 +59,20 @@
               }
             }
           }
-        }
+        },
+        "parameters": [
+          {
+            "name": "ngrok-skip-browser-warning",
+            "in": "header",
+            "required": false,
+            "description": "Temporary sandbox tunnel header; included by the playground.",
+            "schema": {
+              "type": "string",
+              "default": "1"
+            },
+            "example": "1"
+          }
+        ]
       }
     },
     "/auth": {
@@ -185,6 +198,17 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "ngrok-skip-browser-warning",
+            "in": "header",
+            "required": false,
+            "description": "Temporary sandbox tunnel header; included by the playground.",
+            "schema": {
+              "type": "string",
+              "default": "1"
+            },
+            "example": "1"
           }
         ]
       },
@@ -287,7 +311,20 @@
               }
             }
           }
-        }
+        },
+        "parameters": [
+          {
+            "name": "ngrok-skip-browser-warning",
+            "in": "header",
+            "required": false,
+            "description": "Temporary sandbox tunnel header; included by the playground.",
+            "schema": {
+              "type": "string",
+              "default": "1"
+            },
+            "example": "1"
+          }
+        ]
       }
     },
     "/sep12/customer": {
@@ -440,6 +477,17 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "ngrok-skip-browser-warning",
+            "in": "header",
+            "required": false,
+            "description": "Temporary sandbox tunnel header; included by the playground.",
+            "schema": {
+              "type": "string",
+              "default": "1"
+            },
+            "example": "1"
           }
         ]
       },
@@ -538,10 +586,47 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/CustomerInput"
+              },
+              "examples": {
+                "Sender": {
+                  "summary": "Sender",
+                  "value": {
+                    "account": "GCZN3RM3P3M3NZH5OS6DHVXZIOGMTW4CIORHBVMRLSA3JASUHKSE4DKI",
+                    "memo": "demo-sender",
+                    "memo_type": "text",
+                    "type": "sep31-sender",
+                    "first_name": "Demo",
+                    "last_name": "Sender"
+                  }
+                },
+                "Receiver": {
+                  "summary": "Receiver",
+                  "value": {
+                    "account": "GCZN3RM3P3M3NZH5OS6DHVXZIOGMTW4CIORHBVMRLSA3JASUHKSE4DKI",
+                    "memo": "receiver-amina-demo",
+                    "memo_type": "text",
+                    "type": "sep31-receiver",
+                    "first_name": "Amina",
+                    "last_name": "Diop"
+                  }
+                }
               }
             }
           }
-        }
+        },
+        "parameters": [
+          {
+            "name": "ngrok-skip-browser-warning",
+            "in": "header",
+            "required": false,
+            "description": "Temporary sandbox tunnel header; included by the playground.",
+            "schema": {
+              "type": "string",
+              "default": "1"
+            },
+            "example": "1"
+          }
+        ]
       }
     },
     "/sep38/info": {
@@ -633,7 +718,20 @@
               }
             }
           }
-        }
+        },
+        "parameters": [
+          {
+            "name": "ngrok-skip-browser-warning",
+            "in": "header",
+            "required": false,
+            "description": "Temporary sandbox tunnel header; included by the playground.",
+            "schema": {
+              "type": "string",
+              "default": "1"
+            },
+            "example": "1"
+          }
+        ]
       }
     },
     "/sep38/prices": {
@@ -767,6 +865,17 @@
                 "SEN"
               ]
             }
+          },
+          {
+            "name": "ngrok-skip-browser-warning",
+            "in": "header",
+            "required": false,
+            "description": "Temporary sandbox tunnel header; included by the playground.",
+            "schema": {
+              "type": "string",
+              "default": "1"
+            },
+            "example": "1"
           }
         ]
       }
@@ -932,6 +1041,17 @@
                 "SEN"
               ]
             }
+          },
+          {
+            "name": "ngrok-skip-browser-warning",
+            "in": "header",
+            "required": false,
+            "description": "Temporary sandbox tunnel header; included by the playground.",
+            "schema": {
+              "type": "string",
+              "default": "1"
+            },
+            "example": "1"
           }
         ]
       }
@@ -1032,10 +1152,30 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/QuoteInput"
+              },
+              "example": {
+                "context": "sep31",
+                "sell_asset": "stellar:USDC:GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5",
+                "buy_asset": "iso4217:XOF",
+                "sell_amount": "0.2",
+                "buy_delivery_method": "PI_SPI"
               }
             }
           }
-        }
+        },
+        "parameters": [
+          {
+            "name": "ngrok-skip-browser-warning",
+            "in": "header",
+            "required": false,
+            "description": "Temporary sandbox tunnel header; included by the playground.",
+            "schema": {
+              "type": "string",
+              "default": "1"
+            },
+            "example": "1"
+          }
+        ]
       }
     },
     "/sep38/quote/{quote_id}": {
@@ -1136,6 +1276,17 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "ngrok-skip-browser-warning",
+            "in": "header",
+            "required": false,
+            "description": "Temporary sandbox tunnel header; included by the playground.",
+            "schema": {
+              "type": "string",
+              "default": "1"
+            },
+            "example": "1"
           }
         ]
       }
@@ -1230,7 +1381,20 @@
             }
           }
         },
-        "security": []
+        "security": [],
+        "parameters": [
+          {
+            "name": "ngrok-skip-browser-warning",
+            "in": "header",
+            "required": false,
+            "description": "Temporary sandbox tunnel header; included by the playground.",
+            "schema": {
+              "type": "string",
+              "default": "1"
+            },
+            "example": "1"
+          }
+        ]
       }
     },
     "/sep31/transactions": {
@@ -1329,10 +1493,35 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/PaymentInput"
+              },
+              "example": {
+                "amount": "0.2",
+                "asset_code": "USDC",
+                "asset_issuer": "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5",
+                "destination_asset": "iso4217:XOF",
+                "quote_id": "<quote-id-from-previous-response>",
+                "sender_id": "<sender-customer-id>",
+                "receiver_id": "<receiver-customer-id>",
+                "fields": {
+                  "transaction": {}
+                }
               }
             }
           }
-        }
+        },
+        "parameters": [
+          {
+            "name": "ngrok-skip-browser-warning",
+            "in": "header",
+            "required": false,
+            "description": "Temporary sandbox tunnel header; included by the playground.",
+            "schema": {
+              "type": "string",
+              "default": "1"
+            },
+            "example": "1"
+          }
+        ]
       }
     },
     "/sep31/transactions/{id}": {
@@ -1433,6 +1622,17 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "ngrok-skip-browser-warning",
+            "in": "header",
+            "required": false,
+            "description": "Temporary sandbox tunnel header; included by the playground.",
+            "schema": {
+              "type": "string",
+              "default": "1"
+            },
+            "example": "1"
           }
         ]
       }
@@ -1457,7 +1657,8 @@
       "StellarAccount": {
         "type": "string",
         "description": "Public Stellar account. Never a private key.",
-        "pattern": "^G[A-Z2-7]{55}$"
+        "pattern": "^G[A-Z2-7]{55}$",
+        "example": "GCZN3RM3P3M3NZH5OS6DHVXZIOGMTW4CIORHBVMRLSA3JASUHKSE4DKI"
       },
       "Asset": {
         "type": "string",

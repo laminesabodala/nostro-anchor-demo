@@ -16,6 +16,7 @@
             "group": "Sandbox",
             "pages": [
               "index",
+              "live-demo",
               "quickstart",
               "authentication",
               "payment-lifecycle",
@@ -35,5 +36,18 @@
         ]
       }
     ]
+  },
+  "api": {
+    "playground": {
+      "display": "interactive",
+      "proxy": false
+    },
+    "examples": {
+      "languages": [
+        "curl",
+        "javascript"
+      ],
+      "prefill": true
+    }
   }
 }
