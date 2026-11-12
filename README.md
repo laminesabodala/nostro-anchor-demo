@@ -11,7 +11,7 @@ A working **official Stellar Anchor Platform 2.11.2 → Stellar Testnet USDC →
 
 Hosted API: **https://sandbox-api.nostro.finance**. Run the browser-only walkthrough at **https://nostro.mintlify.site/quickstart**. The demo runs on OVH independently of the development computer. See [deployment and recovery instructions](deploy/README.md).
 
-Canonical source: private repository `laminesabodala/nostro-anchor-demo`. Mintlify sources are also saved in `laminesabodala/nostro-anchor-docs`; the hosted Mintlify editor remains the publishing source.
+Architecture : https://nostro.gitbook.io/nostro
 
 ## What the demo proves
 
